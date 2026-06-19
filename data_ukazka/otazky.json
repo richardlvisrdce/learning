@@ -1,0 +1,7 @@
+[
+  {"kapitola": 1, "typ": "OK", "tvrzeni": "Python je programovací jazyk."},
+  {"kapitola": 1, "typ": "OK", "tvrzeni": "GitHub slouží k verzování kódu."},
+  {"kapitola": 1, "typ": "NOK", "tvrzeni": "Python je hardwarová komponenta počítače."},
+  {"kapitola": 1, "typ": "NOK", "tvrzeni": "Ve VS Code nelze psát v Pythonu."},
+  {"kapitola": 1, "typ": "NOK", "tvrzeni": "Git je zkratka pro Google Internet Technology."}
+]

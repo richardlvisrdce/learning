@@ -5,7 +5,7 @@ import os
 import json
 
 # === KONFIGURACE ===
-DATA_FILE = "data_ukazka/karty.json"
+DATA_FILE = "data_ukazka/kyberpojmy.json"
 LOCAL_DIR = "local_data"
 PROGRESS_FILE = os.path.join(LOCAL_DIR, "progress.json")
 STARRED_FILE = os.path.join(LOCAL_DIR, "starred.json")

@@ -1,0 +1,17 @@
+[
+    {
+      "kapitola": 1,
+      "term": "Identifikace",
+      "definition": "Určení totožnosti osoby – kdo jsem."
+    },
+    {
+      "kapitola": 1,
+      "term": "Autentizace",
+      "definition": "Ověření, že jsem tím, za koho se vydávám."
+    },
+    {
+      "kapitola": 2,
+      "term": "Phishing",
+      "definition": "Podvodná technika k získání citlivých údajů."
+    }
+  ]

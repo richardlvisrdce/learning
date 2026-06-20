@@ -44,14 +44,10 @@ class Player:
 
     def move(self, keys) -> None:
         # upper left corner has coords [0, 0] so Y-axis changes mirror to that in cartesian
-        if keys[pygame.K_a]:
-            self.rect.x -= self.speed
-        if keys[pygame.K_d]:
-            self.rect.x += self.speed
-        if keys[pygame.K_w]: 
-            self.rect.y -= self.speed
-        if keys[pygame.K_s]: 
-            self.rect.y += self.speed
+        if keys[pygame.K_a]: self.rect.x -= self.speed
+        if keys[pygame.K_d]: self.rect.x += self.speed
+        if keys[pygame.K_w]: self.rect.y -= self.speed
+        if keys[pygame.K_s]: self.rect.y += self.speed
 
         # keep player inside room walls (simple boundaries)
         self.rect.clamp_ip(ROOM_BOUNDS)
@@ -62,7 +58,6 @@ class Player:
 
     def draw(self, surface):
         surface.blit(sprite_img, self.rect.topleft)
-        
 
 
 class Tear:
@@ -78,7 +73,6 @@ class Tear:
     
     def draw(self, surface) -> None:
         surface.blit(tear_img, self.rect.topleft)
-    
 
 
 player = Player(400, 300)

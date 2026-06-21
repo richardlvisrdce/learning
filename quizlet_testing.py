@@ -12,21 +12,40 @@ LOCAL_DIR = "local_data"
 PROGRESS_FILE = os.path.join(LOCAL_DIR, "progress.json")
 STARRED_FILE = os.path.join(LOCAL_DIR, "starred.json")
 
-# TODO
-# TESTBANKS = ["pv017", "bi301k"]
+# TODO - select_subject + implement it into main loop
+TESTBANKS = ["pv017", "bi301k"]
 
-# def select_subject(cur_subject):
-#     """Vybere z možných předmětů/testbank"""
-#     ### změnit DATA_FILE
-#     clock = pygame.time.Clock()
-#     while 
-#     subject = selection()
-#     if subject not in TESTBANKS:
-#         print(f"Předmět {subject} nemáme!")
-#         # ponechame ten co byl (pripadne nejaky ukazkovy)
-#         return cur_subject
-
-#     return subject
+def select_subject(cur_subject, screen, font, small_font, bg_color, info_color, def_color, available_subjects: list[str]):
+    """Vybere z možných předmětů/testbank"""
+    ### změnit DATA_FILE
+    # clock = pygame.time.Clock()
+    selecting = True
+    clock = pygame.time.Clock()
+    while selecting:
+        screen.fill(bg_color)
+        draw_text(screen, "Zvolte požadovaný předmět", (960, 60), font, (255, 255, 0), center=True)
+        draw_text(screen, "Stisknutím příslušného čísla", (960, 150), small_font, info_color, center=True)
+        for i, subj in enumerate(available_subjects):
+            # mbe slightly tweak i-offset to be more centered            
+            y_pos = 250 + i * 40
+            draw_text(screen, f"{i} - {subj}", (960, y_pos), font, info_color, center=True)
+        pygame.display.flip()
+        new_subject = cur_subject
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit(); sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_DOWN:
+                    new_subject = available_subjects[(i + 1) % len(available_subjects)]
+                elif event.key == pygame.K_UP:
+                    new_subject = available_subjects[(i - 1) % len(available_subjects)]
+                elif event.key == pygame.K_RETURN:
+                    return new_subject
+                elif event.key == pygame.K_ESCAPE:
+                    # TODO
+                    # wtf do i return here? Raise error or do we solve it elsewhere?
+                    return new_subject
+        clock.tick(30)
     
     
 

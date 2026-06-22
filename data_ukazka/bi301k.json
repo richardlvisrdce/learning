@@ -1,0 +1,172 @@
+[
+    {
+      "kapitola": 1,
+      "term": "eSbírka",
+      "definition": "Elektronická sbírka zákonů České republiky, která obsahuje všechny právní předpisy platné na území ČR v elektronické podobě."
+    },
+    {
+      "kapitola": 1,
+      "term": "eGovernment",
+      "definition": "Elektronická veřejná správa, která umožňuje občanům a firmám komunikovat s úřady prostřednictvím digitálních technologií."
+    },
+    {
+      "kapitola": 1,
+      "term": "CzechPOINT",
+      "definition": "Centrální kontaktní místo pro podávání žádostí a ověřování dokumentů elektronickou formou."
+    },
+    {
+      "kapitola": 1,
+      "term": "Základní registry",
+      "definition": "Soubor centrálních registrů veřejné správy, které obsahují klíčová data o osobách, území, registrech práv a povinností."
+    },
+    {
+      "kapitola": 1,
+      "term": "DIA (Digitální agenda)",
+      "definition": "Strategický dokument, který stanovuje priority a cíle digitální transformace veřejné správy."
+    },
+    {
+      "kapitola": 1,
+      "term": "Právní jistota",
+      "definition": "Princip, který zajišťuje, že právní předpisy jsou jasné, předvídatelné a stabilní."
+    },
+    {
+      "kapitola": 1,
+      "term": "eLegislativa",
+      "definition": "Informační systém vlády ČR pro elektronickou přípravu legislativních materiálů."
+    },
+    {
+      "kapitola": 2,
+      "term": "Elektronický podpis",
+      "definition": "Data v elektronické podobě připojená k jiným datům, která slouží k ověření totožnosti podepisující fyzické osoby."
+    },
+    {
+      "kapitola": 2,
+      "term": "Elektronická pečeť",
+      "definition": "Obdoba podpisu pro právnické osoby; zaručuje původ dokumentu a jeho integritu, ale nevyjadřuje vůli konkrétního člověka."
+    },
+    {
+      "kapitola": 2,
+      "term": "Nařízení eIDAS",
+      "definition": "Přímo účinný právní rámec EU pro elektronickou identifikaci a služby vytvářející důvěru (certifikáty, časová razítka)."
+    },
+    {
+      "kapitola": 2,
+      "term": "Úroveň záruky (LoA)",
+      "definition": "Klasifikace spolehlivosti identifikace na tři stupně: nízká (jméno/heslo), značná (SMS kód), vysoká (čipová karta)."
+    },
+    {
+      "kapitola": 2,
+      "term": "Datová schránka",
+      "definition": "Státem garantovaný nástroj pro bezpečnou komunikaci, který nahrazuje doporučené dopisy v papírovém světě."
+    },
+    {
+      "kapitola": 2,
+      "term": "Fikce doručení v DS",
+      "definition": "Pokud se uživatel nepřihlásí, považuje se zpráva za doručenou 10. dnem po dodání (neplatí u některých typů zpráv)."
+    },
+    {
+      "kapitola": 3,
+      "term": "Právo na soukromí vs. Ochrana údajů",
+      "definition": "Soukromí chrání člověka před zásahy do soukromého života (EÚLP), ochrana údajů specificky kontroluje tok informací o osobě (GDPR)."
+    },
+    {
+      "kapitola": 3,
+      "term": "Zásada odpovědnosti (GDPR)",
+      "definition": "Povinnost správce nejen dodržovat principy zpracování, ale být schopen toto dodržování kdykoliv doložit."
+    },
+    {
+      "kapitola": 3,
+      "term": "Zvláštní kategorie údajů",
+      "definition": "Citlivé údaje (rasa, zdraví, biometrie, politické názory) – jejich zpracování je v základu zakázáno s úzkými výjimkami."
+    },
+    {
+      "kapitola": 3,
+      "term": "Správce vs. Zpracovatel",
+      "definition": "Správce určuje účel a prostředky zpracování; zpracovatel provádí konkrétní operace s daty pouze na základě pokynů správce."
+    },
+    {
+      "kapitola": 3,
+      "term": "Posouzení vlivu (DPIA)",
+      "definition": "Analýza rizik nutná před spuštěním rizikového zpracování (např. plošný monitoring)."
+    },
+    {
+      "kapitola": 3,
+      "term": "Právo na výmaz (být zapomenut)",
+      "definition": "Správce musí smazat data, pokud už není právní důvod je mít nebo byl odvolán souhlas."
+    },
+    {
+      "kapitola": 3,
+      "term": "ePrivacy (Lex specialis)",
+      "definition": "Směrnice upřesňující pravidla elektronické komunikace (např. nutnost aktivního souhlasu pro netechnické cookies)."
+    },
+    {
+      "kapitola": 4,
+      "term": "ZoKB",
+      "definition": "Zákon o kybernetické bezpečnosti: Hlavní český předpis definující povinnosti pro klíčové subjekty a pravomoci NÚKIB."
+    },
+    {
+      "kapitola": 4,
+      "term": "Kritická informační infrastruktura (KII)",
+      "definition": "Systémy, jejichž výpadek by měl drtivý dopad na stát (energetika, bankovnictví)."
+    },
+    {
+      "kapitola": 4,
+      "term": "Protiopatření (Příklad - Sinkholing)",
+      "definition": "Přesměrování škodlivého provozu do 'černé díry' (serveru pod kontrolou obránců) k odvrácení útoku."
+    },
+    {
+      "kapitola": 4,
+      "term": "Poskytovatel služeb (ISP)",
+      "definition": "Zprostředkovatel obsahu (přenos, hosting, vyhledávání). Má úlevy z odpovědnosti, protože obsah netvoří."
+    },
+    {
+      "kapitola": 4,
+      "term": "Zákaz obecného dohledu",
+      "definition": "Právní princip (čl. 15 Směrnice), podle kterého stát nesmí ISP uložit povinnost plošně sledovat veškerou aktivitu uživatelů."
+    },
+    {
+      "kapitola": 4,
+      "term": "Bezpečný přístav (Safe Harbor pro ISP)",
+      "definition": "ISP neodpovídá za obsah třetích stran, pokud splní podmínky pasivní role (např. po upozornění obsah smaže)."
+    },
+    {
+      "kapitola": 4,
+      "term": "ISP 1. typu - Připojení (Mere Conduit)",
+      "definition": "Absolutní neodpovědnost za přenášený obsah, pokud přenos nezahájil, nevybral příjemce a obsah nezměnil."
+    },
+    {
+      "kapitola": 5,
+      "term": "Elektronický důkaz (Zákonnost)",
+      "definition": "Musí být garantována legalita získání (legitimita), neměnnost (integrita) a schopnost prokázat původ (autenticita)."
+    },
+    {
+      "kapitola": 5,
+      "term": "§ 230 TZ (Neoprávněný přístup)",
+      "definition": "Skutková podstata trestného činu hackingu. Vyžaduje překonání bezpečnostního opatření (např. prolomení hesla)."
+    },
+    {
+      "kapitola": 5,
+      "term": "Příkaz k uchování dat (§ 88a TrŘ)",
+      "definition": "'Zmrazení' dat. Policie přikáže ISP, aby data nemazal, než získá povolení soudu k jejich vydání."
+    },
+    {
+      "kapitola": 5,
+      "term": "Data Retention",
+      "definition": "Povinnost operátorů 6 měsíců uchovávat provozní a lokalizační údaje o komunikaci (nikoliv samotný obsah)."
+    },
+    {
+      "kapitola": 5,
+      "term": "Zákon 106/1999 Sb.",
+      "definition": "Základní předpis zaručující právo na informace veřejného sektoru (vše je veřejné, co není tajné)."
+    },
+    {
+      "kapitola": 5,
+      "term": "Kyberválka a humanitární právo",
+      "definition": "Platí princip distinkce (rozlišení civilních a vojenských cílů) a proporcionality. Hacker přímo útočící se stává legitimním cílem."
+    },
+    {
+      "kapitola": 5,
+      "term": "ROB a ROS",
+      "definition": "Základní registry: ROB (Registr obyvatel pro fyzické osoby), ROS (Registr osob pro právnické osoby a podnikatele)."
+    }
+  ]

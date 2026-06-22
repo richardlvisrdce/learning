@@ -12,7 +12,6 @@ LOCAL_DIR = "local_data"
 PROGRESS_FILE = os.path.join(LOCAL_DIR, "progress.json")
 STARRED_FILE = os.path.join(LOCAL_DIR, "starred.json")
 
-# TODO - select_subject + implement it into main loop
 TESTBANKS = ["pv017", "bi301k"]
 
 def select_subject(cur_subject, screen, font, small_font, bg_color, info_color, def_color, available_subjects: list[str]):
@@ -20,31 +19,45 @@ def select_subject(cur_subject, screen, font, small_font, bg_color, info_color, 
     ### změnit DATA_FILE
     # clock = pygame.time.Clock()
     selecting = True
+    new_subject = cur_subject
+    newsub_idx = 0
     clock = pygame.time.Clock()
+    screen.fill(bg_color)
+    draw_text(screen, "Zvolte požadovaný předmět", (960, 60), font, (255, 255, 0), center=True)
+    draw_text(screen, "Stisknutím příslušného čísla", (960, 150), small_font, info_color, center=True)
+    for i, subj in enumerate(available_subjects):
+        # mbe slightly tweak i-offset to be more centered
+        y_pos = 250 + i * 40
+        # keeps the vibecoded feel lol
+        status = ">>>" if subj == new_subject else ""
+        color = def_color if subj == new_subject else info_color
+        draw_text(screen, f"{status} {subj}", (960, y_pos), font, color, center=True)
+    pygame.display.flip()
     while selecting:
         screen.fill(bg_color)
         draw_text(screen, "Zvolte požadovaný předmět", (960, 60), font, (255, 255, 0), center=True)
         draw_text(screen, "Stisknutím příslušného čísla", (960, 150), small_font, info_color, center=True)
-        for i, subj in enumerate(available_subjects):
-            # mbe slightly tweak i-offset to be more centered            
-            y_pos = 250 + i * 40
-            draw_text(screen, f"{i} - {subj}", (960, y_pos), font, info_color, center=True)
-        pygame.display.flip()
-        new_subject = cur_subject
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit(); sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_DOWN:
-                    new_subject = available_subjects[(i + 1) % len(available_subjects)]
+                    newsub_idx += 1
+                    new_subject = available_subjects[(newsub_idx) % len(available_subjects)]
                 elif event.key == pygame.K_UP:
-                    new_subject = available_subjects[(i - 1) % len(available_subjects)]
+                    newsub_idx -= 1
+                    new_subject = available_subjects[(newsub_idx - 1) % len(available_subjects)]
                 elif event.key == pygame.K_RETURN:
                     return new_subject
                 elif event.key == pygame.K_ESCAPE:
-                    # TODO
-                    # wtf do i return here? Raise error or do we solve it elsewhere?
-                    return new_subject
+                    return None
+                for i, subj in enumerate(available_subjects):
+                    # mbe slightly tweak i-offset to be more centered ?
+                    y_pos = 250 + i * 40
+                    status = ">>>" if i == newsub_idx else ""
+                    color = def_color if i == newsub_idx else info_color
+                    draw_text(screen, f"{status} {subj}", (960, y_pos), font, color, center=True)
+                pygame.display.flip()
         clock.tick(30)
     
     
@@ -62,12 +75,16 @@ def load_flashcards(filename):
     """Načte data z JSON souboru."""
     if not os.path.exists(filename):
         print(f"Soubor {filename} nebyl nalezen!")
+        pygame.quit()
+        sys.exit()
         return []
     try:
         with open(filename, "r", encoding="utf-8") as f:
             return json.load(f)
     except Exception as e:
         print(f"Chyba při načítání JSON: {e}")
+        pygame.quit()
+        sys.exit()
         return []
 
 def get_available_chapters(cards_data):
@@ -192,6 +209,17 @@ def main():
     text_font = pygame.font.SysFont("arial", 28)
     small_font = pygame.font.SysFont("arial", 22)
 
+
+    cur_subject = select_subject(TESTBANKS[0], screen, text_font, small_font, BG, INFO_COLOR, DEF_COLOR, TESTBANKS)
+    if not cur_subject:
+        pygame.quit()
+        sys.exit()
+    DATA_FILE = f"data_ukazka/{cur_subject}.json"
+    # if not os.path.exists(DATA_FILE):
+        
+    #     pygame.quit()
+    #     sys.exit()
+
     # Načtení dat a kapitol
     all_cards_data = load_flashcards(DATA_FILE)
     available_chapters = get_available_chapters(all_cards_data)
@@ -212,7 +240,7 @@ def main():
     learning_correct_pos = 0
     learning_answered = False
     learning_selected = None
-
+    
     running = True
     while running:
         screen.fill(BG)

@@ -2,14 +2,13 @@ import pygame # ideally pygame -ce
 import sys
 import math
 
-pygame.init()
-WIDTH, HEIGHT = 800, 600
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-clock = pygame.time.Clock()
 BLUE = (100, 150, 255)
+pygame.init()
+screen = pygame.display.set_mode((1600, 1200), pygame.RESIZABLE)
+clock = pygame.time.Clock()
 
-
-ROOM_BOUNDS = pygame.Rect(50, 50, 700, 500) # left, top, width, height
+# ROOM_BOUNDS = pygame.Rect(50, 50, 700, 500) # left, top, width, height
+ROOM_BOUNDS = pygame.Rect(100, 100, 1400, 1000) # left, top, width, height
 
 sprite_chosen = "TBOI/isaac"
 
@@ -38,7 +37,7 @@ tear_img.set_colorkey((0, 0, 0))
 class Player:
     def __init__(self, x: int, y: int) -> None:
         self.rect = pygame.Rect(x, y, sprite_img.get_width(), sprite_img.get_height())
-        self.speed: int = 4
+        self.speed: int = 8
         self.health: int = 3
         self.shoot_cooldown: int = 0
 
@@ -79,9 +78,7 @@ player = Player(400, 300)
 tears = []
 
 running: bool = True
-while running:
-    clock.tick(60)
-    
+while running:    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -123,6 +120,7 @@ while running:
         tear.draw(screen)
         
     pygame.display.flip()
+    clock.tick(60)
 
 pygame.quit()
 sys.exit()

@@ -93,6 +93,7 @@ class Floor_Manager:
         self.num_rooms = num_rooms
         # 10x10 grid of rooms. None means empty space, string means room type
         self.grid: list[list[str | None]] = [[None for _ in range(10)] for _ in range(10)]
+        self.room_instances: list[list[Room | None]] = [[None for _ in range(10)] for _ in range(10)]
         # Start in the exact middle of the floor grid
         self.start_x = 5
         self.start_y = 5
@@ -184,7 +185,7 @@ class Player:
     #         self.current_direction = "front"
 
     #     self.rect.clamp_ip(ROOM_BOUNDS)
-    def move(self, keys, current_room: Room) -> None:
+    def move(self, keys, current_room: Room, active_enemies: list) -> None:
         dx, dy = 0, 0
         if keys[pygame.K_a]: dx -= self.speed
         if keys[pygame.K_d]: dx += self.speed
@@ -206,6 +207,20 @@ class Player:
                     self.rect.bottom = wall.top
                 elif dy < 0:
                     self.rect.top = wall.bottom
+        self.rect.clamp_ip(pygame.Rect(0, 0, 1600, 1200))
+        
+        if len(active_enemies) > 0:
+            # Kočka nemůže na okraj obrazovky, dokud jsou myši naživu
+            # Zmenšíme jí hřiště o TILE_SIZE (80 pixelů) z každé strany
+            self.rect.clamp_ip(pygame.Rect(TILE_SIZE, TILE_SIZE, 1600 - 2*TILE_SIZE, 1200 - 2*TILE_SIZE))
+            return None # Nemůže odejít
+
+        if self.rect.top <= 0: return "north"
+        if self.rect.bottom >= 1200: return "south"
+        if self.rect.left <= 0: return "west"
+        if self.rect.right >= 1600: return "east"
+            
+        return None
 
     def update(self) -> None:
         if self.shoot_cooldown > 0:
@@ -243,6 +258,20 @@ class Tear:
 
 player = Player(400, 300)
 tears = []
+
+
+
+
+enemy_types = ["fly", "beetle", "mechanical_mouse", "mouse"]
+enemy_sprites = {}
+
+for e_type in enemy_types:
+    # Load each enemy and upscale it slightly (e.g., to 64x64 or according to scale)
+    img = pygame.image.load(f"TBOI/cat_version/enemy/{e_type}.png").convert()
+    img = pygame.transform.scale(img, (80, 80)) # Scale them to fit exactly 1 tile size
+    bg_color = img.get_at((0, 0)) # TODO doenstwork
+    img.set_colorkey(bg_color) # This removes the bright green screen completely!
+    enemy_sprites[e_type] = img
 
 
 OBSTACLES = ["rock", "spike", "mousetrap"] # some of these can be destroyed, some can have effects on contact, some can be moved by player, some move on their own
@@ -305,8 +334,57 @@ class Enemy:
     # collision dmg, tear dmg will be normalised to half/full heart
     # need special attacks for each one, some will only have 1 attack, bosses will have like 3
     # need to move on their own so defo some AI
-    def __init__(self):
-        pass
+    def __init__(self, x: int, y: int, enemy_type: str):
+        self.type = enemy_type
+        # 60x60 hitbox inside an 80x80 tile makes it feel tight and fair
+        self.rect = pygame.Rect(x, y, 60, 60)
+        self.speed: float = 0.0
+        # Stats based on type
+        if self.type == "fly":
+            self.speed: float = 3.5  # Fast but fragile
+            self.health: int = 1
+        elif self.type == "mouse":
+            self.speed: float = 2.0  # Normal speed, normal health
+            self.health: int = 2
+        elif self.type == "mechanical_mouse":
+            self.speed: float = 4.5  # Super fast clockwork toy!
+            self.health: int = 1
+        elif self.type == "beetle":
+            self.speed: float = 1.2  # Slow tank armored bug
+            self.health: int = 4
+
+    def move_towards_player(self, player_rect, current_room: Room):
+        # Calculate distance
+        dx = player_rect.centerx - self.rect.centerx
+        dy = player_rect.centery - self.rect.centery
+        distance = math.hypot(dx, dy)
+
+        if distance == 0: return
+
+        # Normalize vector
+        dx /= distance
+        dy /= distance
+
+        # Move X with room collision check
+        self.rect.x += int(dx * self.speed)
+        for wall in current_room.walls + current_room.obstacles:
+            if self.rect.colliderect(wall):
+                if dx > 0:  self.rect.right = wall.left
+                elif dx < 0: self.rect.left = wall.right
+
+        # Move Y with room collision check
+        self.rect.y += int(dy * self.speed)
+        for wall in current_room.walls + current_room.obstacles:
+            if self.rect.colliderect(wall):
+                if dy > 0:   self.rect.bottom = wall.top
+                elif dy < 0: self.rect.top = wall.bottom
+
+    def draw(self, surface):
+        # Draw the correct sprite centered on the hitbox
+        sprite = enemy_sprites[self.type]
+        # Offset to draw 80x80 sprite nicely over 60x60 rect
+        render_pos = (self.rect.x - 10, self.rect.y - 10)
+        surface.blit(sprite, render_pos)
 
 
 class Boss:
@@ -316,45 +394,50 @@ class Boss:
         pass
 
 
-def load_room_by_type(room_type: str) -> list[list[int]]:
-    # BRUTALLY VIBECODED #TODO check if ok
-    # 1. Base clean room layout with doors on all 4 sides
+
+def load_room_by_type(room_type: str, floor: Floor_Manager, x: int, y: int) -> list[list[int]]:
+    # JUST VIBES. better check it later
+    # 0. Zjistíme, jestli máme sousedy v mřížce (a nejdeme mimo 10x10)
+    has_north = y > 0 and floor.grid[y-1][x] is not None
+    has_south = y < 9 and floor.grid[y+1][x] is not None
+    has_west = x > 0 and floor.grid[y][x-1] is not None
+    has_east = x < 9 and floor.grid[y][x+1] is not None
+
+    # 1. Base clean room layout
     new_map = []
     for r in range(15):
         row = []
         for c in range(20):
             if r == 0 or r == 14 or c == 0 or c == 19:
-                # Open doors in the middle of walls
-                if (r == 0 and c in [9, 10]) or (r == 14 and c in [9, 10]) or (r == 7 and c in [0, 19]):
-                    row.append(0)
+                is_door = False
+                # Dveře se vytvoří, pouze pokud je tím směrem místnost
+                if r == 0 and c in [8, 9, 10, 11] and has_north: is_door = True
+                if r == 14 and c in [8, 9, 10, 11] and has_south: is_door = True
+                if r in [6, 7, 8] and c == 0 and has_west: is_door = True
+                if r in [6, 7, 8] and c == 19 and has_east: is_door = True
+
+                if is_door:
+                    row.append(0) # Open path
                 else:
                     row.append(1) # Solid wall
             else:
                 row.append(0) # Empty floor
         new_map.append(row)
 
-    # 2. Add specific obstacles based on what kind of room this is
+    # 2. Zbytek funkce (překážky podle typu místnosti) zůstává ÚPLNĚ STEJNÝ
     if room_type == "start":
-        # Start room stays completely empty and safe
         pass
-        
     elif room_type == "treasure":
-        # Treasure room: Rocks forming a protective square in the center for the item
         new_map[6][9], new_map[6][10] = 2, 2
         new_map[8][9], new_map[8][10] = 2, 2
         new_map[7][8], new_map[7][11] = 2, 2
-        
     elif room_type == "boss":
-        # Boss room: Empty center for the fight, spikes in corners
         new_map[2][2], new_map[2][17] = 3, 3
         new_map[12][2], new_map[12][17] = 3, 3
-        
     elif room_type == "normal":
-        # Regular enemy room: Random distribution of rocks (5%) and spikes (2%)
         for r in range(1, 14):
             for c in range(1, 19):
-                # Don't spawn directly in front of doors or in the dead center
-                if r in [1, 2, 7, 12, 13] and c in [1, 2, 9, 10, 17, 18]:
+                if r in [1, 2, 6, 7, 8, 12, 13] and c in [1, 2, 8, 9, 10, 11, 17, 18]:
                     continue
                 rand = random.random()
                 if rand < 0.05:     new_map[r][c] = 2
@@ -374,13 +457,13 @@ def draw_main_menu(screen, nyan_gif: str, menu_music: str, NAME_FONT) -> None:
     pass
 # draw_main_menu(screen, NYAN_GIF, MENU_MUSIC)
 
+enemies: list[Enemy] = []
 floor = Floor_Manager(num_rooms=12) # Generates 12 rooms on a 10x10 matrix
 
 # Load the initial layout for the 'start' room from our new function
-initial_layout = load_room_by_type("start")
+initial_layout = load_room_by_type("start", floor, floor.start_x, floor.start_y)
 current_room = Room(initial_layout)
-
-current_room = Room(ROOM_MAP)
+floor.room_instances[floor.start_y][floor.start_x] = current_room # Cache the start room!
 running: bool = True
 while running:
     clock.tick(60)
@@ -391,8 +474,56 @@ while running:
     keys = pygame.key.get_pressed()
     
     # Update stavu hráče
-    player.move(keys, current_room)
+    door_triggered = player.move(keys, current_room, enemies)
     player.update()
+    if door_triggered is not None:
+        tears.clear() # Clear active hairballs
+        
+        # 1. Update positions in the FloorManager grid matrix
+        if door_triggered == "north":
+            floor.current_y -= 1
+            player.rect.centery = 1200 - TILE_SIZE - 40 # Teleport south
+        elif door_triggered == "south":
+            floor.current_y += 1
+            player.rect.centery = TILE_SIZE + 40        # Teleport north
+        elif door_triggered == "west":
+            floor.current_x -= 1
+            player.rect.centerx = 1600 - TILE_SIZE - 40 # Teleport east
+        elif door_triggered == "east":
+            floor.current_x += 1
+            player.rect.centerx = TILE_SIZE + 40        # Teleport west
+
+        # 2. Get the room type from the floor grid map
+        room_type = floor.grid[floor.current_y][floor.current_x]
+        if room_type is None:
+            room_type = "normal"
+            floor.grid[floor.current_y][floor.current_x] = "normal"
+
+        if floor.room_instances[floor.current_y][floor.current_x] is not None:
+            # Pull the existing room layout from memory!
+            current_room = floor.room_instances[floor.current_y][floor.current_x]
+            print(f"Returned to an already VISITED [{room_type}] room at [{floor.current_x}, {floor.current_y}]")
+        else:
+            # Generate a brand new layout, then cache it in room_instances
+            new_layout = load_room_by_type(room_type, floor, floor.current_x, floor.current_y)
+            current_room = Room(new_layout)
+            floor.room_instances[floor.current_y][floor.current_x] = current_room
+            print(f"Generated a NEW [{room_type}] room at [{floor.current_x}, {floor.current_y}]")
+            # Clear hairballs and enemies from previous room
+            tears.clear()
+            enemies.clear()
+
+            # TODO is this in correct place?
+            # Spawn enemies only if it's a 'normal' room and we haven't cleared it yet
+            # (For now we spawn them every time you enter a fresh normal room)
+            if room_type == "normal":
+                for _ in range(random.randint(2, 5)): # 2 to 5 random enemies
+                    rx = random.randint(200, 1400)
+                    ry = random.randint(200, 1000)
+                    
+                    # Pick a random type from your generated green screen image
+                    random_type = random.choice(enemy_types)
+                    enemies.append(Enemy(rx, ry, random_type))
     
     # Střelba na šipky
         # výstřel zároveň otočí sprita do smeru ve kterém střílí, 
@@ -446,6 +577,19 @@ while running:
         # Smazání slzy, pokud narazila do zdi, NEBO pro jistotu vylétla z obrazovky #TODO tohle je hodne hardcoded - sus
         if hit_obstacle or tear.rect.left < 0 or tear.rect.right > 1600 or tear.rect.top < 0 or tear.rect.bottom > 1200:
             tears.remove(tear)
+    # Update enemies and hairball collisions
+    for enemy in enemies[:]:
+        enemy.move_towards_player(player.rect, current_room)
+
+        # Hairball collision check
+        for tear in tears[:]:
+            if tear.rect.colliderect(enemy.rect):
+                enemy.health -= 1
+                if tear in tears: tears.remove(tear) # Destroy hairball
+                
+                if enemy.health <= 0:
+                    if enemy in enemies: enemies.remove(enemy) # RIP enemy
+                    break
 
     virtual_screen.fill((30, 20, 20)) # Dark floor
     
@@ -456,6 +600,8 @@ while running:
     player.draw(virtual_screen)
     for tear in tears:
         tear.draw(virtual_screen)
+    for enemy in enemies:
+        enemy.draw(virtual_screen)
 
     # scale the virtual (logic) screen to the actual screen size and blit it    
     scaled_surface = pygame.transform.scale(virtual_screen, screen.get_size())

@@ -87,8 +87,7 @@ class Room:
 
 class Floor_Manager:
     ### BRUTALLY VIBECODED :(
-    # TODO - manages the floors, rooms, room transitions, etc. 
-    # will have to generate random rooms and #TODO keep track of which ones have been visited
+    # manages the floors, rooms, room transitions, etc.
     def __init__(self, num_rooms: int = 10):
         self.num_rooms = num_rooms
         # 10x10 grid of rooms. None means empty space, string means room type
@@ -185,7 +184,7 @@ class Player:
     #         self.current_direction = "front"
 
     #     self.rect.clamp_ip(ROOM_BOUNDS)
-    def move(self, keys, current_room: Room, active_enemies: list) -> None:
+    def move(self, keys, current_room: Room, active_enemies: list, boss_alive: bool) -> None:
         dx, dy = 0, 0
         if keys[pygame.K_a]: dx -= self.speed
         if keys[pygame.K_d]: dx += self.speed
@@ -209,8 +208,8 @@ class Player:
                     self.rect.top = wall.bottom
         self.rect.clamp_ip(pygame.Rect(0, 0, 1600, 1200))
         
-        if len(active_enemies) > 0:
-            # Kočka nemůže na okraj obrazovky, dokud jsou myši naživu
+        if len(active_enemies) > 0 or boss_alive:
+            # Kočka nemůže na okraj obrazovky, dokud jsou enemy naživu
             # Zmenšíme jí hřiště o TILE_SIZE (80 pixelů) z každé strany
             self.rect.clamp_ip(pygame.Rect(TILE_SIZE, TILE_SIZE, 1600 - 2*TILE_SIZE, 1200 - 2*TILE_SIZE))
             return None # Nemůže odejít
@@ -260,8 +259,6 @@ player = Player(400, 300)
 tears = []
 
 
-
-
 enemy_types = ["fly", "beetle", "mechanical_mouse", "mouse"]
 enemy_sprites = {}
 
@@ -269,8 +266,7 @@ for e_type in enemy_types:
     # Load each enemy and upscale it slightly (e.g., to 64x64 or according to scale)
     img = pygame.image.load(f"TBOI/cat_version/enemy/{e_type}.png").convert()
     img = pygame.transform.scale(img, (80, 80)) # Scale them to fit exactly 1 tile size
-    bg_color = img.get_at((0, 0)) # TODO doenstwork
-    img.set_colorkey(bg_color) # This removes the bright green screen completely!
+    img.set_colorkey((0, 0, 0))
     enemy_sprites[e_type] = img
 
 
@@ -388,15 +384,95 @@ class Enemy:
 
 
 class Boss:
+    # vibecoded but there was no reason not to.
     # need to move+shoot on their own so defo some AI. dmg - 1 heart
     # need special attacks for each one, some will only have 1 attack, bosses will have like 3
-    def __init__(self):
-        pass
+    def __init__(self, x: int, y: int):
+        self.rect = pygame.Rect(x, y, 120, 120)
+        self.speed: float = 2.0
+        self.health: int = 25 # Takes 25 hairballs to kill - #TODO better is to have health bar and about 100hp
+        
+        # AI states
+        self.state = "moving"
+        self.target_x = x
+        self.target_y = y
+        self.action_timer = 0
+        self.shoot_cooldown = 0
+        
+        # Placeholder visual until you get a sprite
+        self.color = (200, 50, 200) # Purple square
 
+    def update_and_move(self, player_rect, current_room: Room, enemy_projectiles: list):
+        self.action_timer -= 1
+        self.shoot_cooldown -= 1
+        
+        # 1. Decide what to do next if timer is up
+        if self.action_timer <= 0:
+            action = random.choice(["move", "shoot", "chase"])
+            if action == "move":
+                # Pick a random spot in the room to walk to
+                self.target_x = random.randint(200, 1400)
+                self.target_y = random.randint(200, 1000)
+                self.action_timer = 60 # Walk for 1 second
+            elif action == "chase":
+                # Walk directly to where the cat is right now
+                self.target_x = player_rect.centerx
+                self.target_y = player_rect.centery
+                self.action_timer = 90
+            elif action == "shoot" and self.shoot_cooldown <= 0:
+                # Shoot a projectile directly at the cat
+                self._shoot_at_player(player_rect, enemy_projectiles)
+                self.action_timer = 30
+                self.shoot_cooldown = 60 # Can't shoot again immediately
+
+        # 2. Actually move towards the target_x, target_y
+        dx = self.target_x - self.rect.centerx
+        dy = self.target_y - self.rect.centery
+        distance = math.hypot(dx, dy)
+
+        if distance > self.speed:
+            dx /= distance
+            dy /= distance
+            self.rect.x += int(dx * self.speed)
+            self.rect.y += int(dy * self.speed)
+            
+            # Basic screen clamp for the boss
+            self.rect.clamp_ip(pygame.Rect(TILE_SIZE, TILE_SIZE, 1600 - 2*TILE_SIZE, 1200 - 2*TILE_SIZE))
+
+    def _shoot_at_player(self, player_rect, enemy_projectiles: list):
+        dx = player_rect.centerx - self.rect.centerx
+        dy = player_rect.centery - self.rect.centery
+        distance = math.hypot(dx, dy)
+        
+        if distance > 0:
+            dx /= distance
+            dy /= distance
+            # Create a simple red projectile moving towards the player
+            enemy_projectiles.append(EnemyProjectile(self.rect.centerx, self.rect.centery, dx, dy))
+
+    def draw(self, surface):
+        pygame.draw.rect(surface, self.color, self.rect)
+
+
+
+class EnemyProjectile:
+    def __init__(self, x: int, y: int, dx: float, dy: float):
+        self.rect = pygame.Rect(x, y, 20, 20)
+        self.speed: float = 8.0
+        self.dx = dx
+        self.dy = dy
+
+    def move(self):
+        self.rect.x += int(self.dx * self.speed)
+        self.rect.y += int(self.dy * self.speed)
+
+    def draw(self, surface):
+        # kinda red
+        pygame.draw.circle(surface, (255, 50, 50), self.rect.center, 10)
 
 
 def load_room_by_type(room_type: str, floor: Floor_Manager, x: int, y: int) -> list[list[int]]:
-    # JUST VIBES. better check it later
+    # JUST VIBES but looks great
     # 0. Zjistíme, jestli máme sousedy v mřížce (a nejdeme mimo 10x10)
     has_north = y > 0 and floor.grid[y-1][x] is not None
     has_south = y < 9 and floor.grid[y+1][x] is not None
@@ -448,7 +524,7 @@ def load_room_by_type(room_type: str, floor: Floor_Manager, x: int, y: int) -> l
 
 #### TODO - couldnt rip menu music from medved misa ve vesmiru so which?
 
-# TODO - how do i put gif + menu text?
+# TODO - how do i put gif + menu text? Made moving png wtf lol
 NYAN_GIF = "TBOI/cat_version/nyan/nyan-cat-original.png"
 MENU_MUSIC = ""
 TITLE_IMG = ""
@@ -458,6 +534,8 @@ def draw_main_menu(screen, nyan_gif: str, menu_music: str, NAME_FONT) -> None:
 # draw_main_menu(screen, NYAN_GIF, MENU_MUSIC)
 
 enemies: list[Enemy] = []
+boss = None
+enemy_projectiles: list[EnemyProjectile] = []
 floor = Floor_Manager(num_rooms=12) # Generates 12 rooms on a 10x10 matrix
 
 # Load the initial layout for the 'start' room from our new function
@@ -474,10 +552,12 @@ while running:
     keys = pygame.key.get_pressed()
     
     # Update stavu hráče
-    door_triggered = player.move(keys, current_room, enemies)
+    door_triggered = player.move(keys, current_room, enemies, boss_alive=(boss is not None))
     player.update()
     if door_triggered is not None:
         tears.clear() # Clear active hairballs
+        enemy_projectiles.clear()
+        boss = None
         
         # 1. Update positions in the FloorManager grid matrix
         if door_triggered == "north":
@@ -513,17 +593,19 @@ while running:
             tears.clear()
             enemies.clear()
 
-            # TODO is this in correct place?
             # Spawn enemies only if it's a 'normal' room and we haven't cleared it yet
-            # (For now we spawn them every time you enter a fresh normal room)
+            # later some rooms will not have enemies...
             if room_type == "normal":
                 for _ in range(random.randint(2, 5)): # 2 to 5 random enemies
                     rx = random.randint(200, 1400)
                     ry = random.randint(200, 1000)
                     
-                    # Pick a random type from your generated green screen image
+                    # pick random enem\
                     random_type = random.choice(enemy_types)
                     enemies.append(Enemy(rx, ry, random_type))
+            elif room_type == "boss":
+                # Spawn boss right in the middle
+                boss = Boss(800 - 60, 600 - 60)
     
     # Střelba na šipky
         # výstřel zároveň otočí sprita do smeru ve kterém střílí, 
@@ -559,11 +641,6 @@ while running:
                             dx, dy)
             tears.append(new_tear)
             player.shoot_cooldown = 15
-
-
-    # # Pass the room to the player movement
-    # player.move(keys, current_room)
-    # player.update()
     
     # Pohyb a mazání slz
     for tear in tears[:]:
@@ -590,8 +667,33 @@ while running:
                 if enemy.health <= 0:
                     if enemy in enemies: enemies.remove(enemy) # RIP enemy
                     break
+    if boss is not None:
+        boss.update_and_move(player.rect, current_room, enemy_projectiles)
+        # boss got hit
+        for tear in tears[:]:
+            if tear.rect.colliderect(boss.rect):
+                boss.health -= 1
+                if tear in tears: tears.remove(tear)
+                if boss.health <= 0:
+                    boss = None # RIP Boss
+                    break
+                    
+    # Update Enemy Projectiles
+    for proj in enemy_projectiles[:]:
+        proj.move()
+        # out of bounds check - if it goes off screen, remove it
+        if proj.rect.left < 0 or proj.rect.right > 1600 or proj.rect.top < 0 or proj.rect.bottom > 1200:
+            enemy_projectiles.remove(proj)
+            continue
+            
+        # we got hit
+        if proj.rect.colliderect(player.rect):
+            player.health -= 1
+            print(f"You got hit, you have {player.health} lives left!")
+            enemy_projectiles.remove(proj)
 
-    virtual_screen.fill((30, 20, 20)) # Dark floor
+                    
+    virtual_screen.fill((30, 20, 20)) # Dark floor. This actually does much more than just fill the background, it also clears the previous frame's drawings.
     
     # Draw the room tiles first!
     current_room.draw(virtual_screen)
@@ -602,6 +704,10 @@ while running:
         tear.draw(virtual_screen)
     for enemy in enemies:
         enemy.draw(virtual_screen)
+    if boss is not None:
+        boss.draw(virtual_screen)
+    for proj in enemy_projectiles:
+        proj.draw(virtual_screen)
 
     # scale the virtual (logic) screen to the actual screen size and blit it    
     scaled_surface = pygame.transform.scale(virtual_screen, screen.get_size())

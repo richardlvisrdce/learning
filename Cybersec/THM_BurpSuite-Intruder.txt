@@ -1,0 +1,73 @@
+Learned about the basics of Intruder and its modules
+
+Note: Burp Community Edition (the free one) is very rate limited, 
+so for real attacks, we either pay for Professional or use tools like hydra, etc.
+
+Attacks:
+For fields that we want to fuzz, use §field§
+eg. username=§admin§&password=§stronkpassword§
+
+# Useful Intruder tabs
+
+Payloads
+ - in the payloads section we either manually write them in, or we
+ - load them from a file (with load button) or paste them.
+ - When we use attacks which want multiple different payloads sets (eg. pitchfork), 
+ - we first put in the set for the first payload, then switch payload position and then put in the next
+
+
+# Types of attacks in Burp
+Sniper
+ - default, good for single-position (eg trying to bruteforce admin's password)
+ - tries each payload for each position (also including the template ones but those only apply to their respective field)
+
+Battering ram
+ - tries each payload in both fields at once (eg. admin + admin, password + password)
+
+Pitchfork
+ - good for multiple fields, where we have multiple wordlists
+ - eg. username + password fuzzing
+
+Cluster bomb
+ - multiple payload sets per position
+ - eg. try each password for all users
+
+
+# Practical notes
+
+I will skip the practical example and just include a few notes:
+ - It's slow. Waiting for 100 requests to go through was about 3-5 minutes.
+ - we then filtered by length (because all were redirects) and succesfully tried the one with least length
+
+# Ticket number system (URL parameter fuzzing)
+
+Then we fuzzed through a ticket number system, which had this format:
+http://MACHINE_IP/support/ticket/NUMBER
+
+The endpoint was not properly configured and had a so-called IDOR vulnerability, which we exploited,
+reading all existing tickets by just putting their number in the URL
+
+we will use a sniper attack. We knew that tickets had numbers 1-100
+So I created a file with 1 - 100 numbers (with a python for loop on pythontutor.com)
+and loaded it into burp.
+After running the attack, I got only 5 or 6 tickets that had status code 200 
+and opened them in browser to find a flag
+
+# Login portal with CSRF protection & session cookie
+
+Now for the "Extra Mile Challenge"...
+
+http://MACHINE_IP/admin/login/
+
+on first glance, a basic username + password field site, but ...
+
+this was pretty hard as the system had a CSRF protection in the form of a hidden field (login token) and a session cookie
+which both changed upon refresh
+we had to create a Burp Macro that would send a GET request to the site and substitute the CSRF token and session cookie in our Intruder requests.
+
+The macro was set up in main setting in Sessions category (detailed guide in the Burp Suite: Intruder [Premium] lab)
+
+After succesfully setting up the macro, we ran the attack and filtered by length and the shortest one was correct.
+
+
+______ END _____

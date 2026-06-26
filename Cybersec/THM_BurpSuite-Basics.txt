@@ -1,0 +1,44 @@
+
+Burp Suite captures HTTP/S traffic between a browser and a web server.
+
+There is a free version (Burp Suite Community) and a paid one. We will be using Community.
+
+
+Main Modules:
+Proxy - intercepts traffic and allows us to change it
+Repeater - for resending same request multiple times
+Intruder - brute-force attacks (heavily rate limited in free version though)
+
+Decoder - encoding/decoding data + hashing (eg. enc/dec URL, Base64, hex <-> text and md5, sha256... hashes)
+Comparer - compares data (eg. seeing what difference do succesful and unsuccesful requests have)
+Sequencer - assesing entropy of tokens (eg. by capturing ~10000 requests and assesing token randomness - possible attack vector if it's very bad)
+
+We usually use it like this:
+
+Configure Proxy in browser - eg. FoxyProxy
+    - for a default Burp Suite we usually use 
+        - protocol = HTTP/HTTPS
+            - note that proxying HTTPS can bring some problems because our browser will not trust Burp Suite
+        - port = 8080
+        - hostname/ip = 127.0.0.1
+
+Burp Suite Proxy tab
+    - set intercept to ON
+    - make sure intercept is ON
+    
+
+Browser - eg. firefox
+    - send a request to the page/pages we want - it will be intercepted in the Proxy tab
+    - if we capture a ton of packets it is best to have some filter eg. only for the IP we're concerned about - this is called Scoping and can be configured in main settings.
+        - note that scoping will make Burp stop caring about everything out of scope, so use it wisely
+    - For the packets we want to work with we right-click them and send them to whatever module/s we want to use. This can be also done with hotkeys (eg. Ctrl + I to send to intruder)
+
+    ... We can also use Burp's browser, but there can be some debugging to do.
+
+Burp Suite Target tab
+ - here we can see a site map, some of our requests and change the scope we focus on (by right-clicking on our target from the list on the left and "Add To Scope")
+
+Burp Suite Intruder tab
+ - here we inspect the traffic and eg. find out what parameters we will try to exploit
+ - !! for actual hardcore bruteforce attacks I cannot recommend intruder as it is very slow
+

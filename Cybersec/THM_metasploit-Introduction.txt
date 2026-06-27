@@ -1,0 +1,61 @@
+# sorry in advance for poor comedy.
+
+exploitation framework that is useful in all phases of pentesting
+Found a weird-looking service ? metasploit (msfconsole; search SERVICE)
+want root or reverse shell and then root ? metasploit
+do you just want some special place where you can be root? metasploit
+
+msfconsole - metasploit's CLI
+modules - exploits, scanners, payloads...
+tools - eg. msfvenom
+
+
+Has a Pro version with a GUI
+But we will use opensource command line version
+
+
+Main modules:
+all of these can be found in /modules folder of your metasploit installation
+
+auxiliary - supporting modules (eg. scanners, fuzzers, spoofers...)
+
+encoders - encode the exploit & payload to bypass a weak signature-based antivirus
+
+evasion - antivirus bypassing (better capability then encoders)
+
+exploits - exploits for multiple systems
+
+payloads - run them on target after an exploit to get things like shell, backdoor, proof of concept...
+     --- subcatecories of payloads ---
+            - adapters = convert payloads to a different format
+            - singles = payloads that can run by themselves
+            - stagers = set up a connection metasploit <--> target
+            - stages = for larger payloads
+
+post - post-exploitation
+
+
+So how do we do an exploit?
+
+1) msfconsole
+2) search SERVICE (ideally also version or more details)
+3) use EXPLOIT_NUMBER
+4) info (see if the choice fits)
+5) show options (this will show us all options and tell us which are required)
+
+when using an exploit, we always set:
+RHOSTS - the target host
+RPORT - target port
+
+in a lot of cases also (with "reverse" payloads such as reverse shells)
+LHOST - listen adress
+LPORT - listen port
+
+PAYLOAD - the payload we want to use 
+SESSION - session ID to be used with post-exploit modules
+
+6) set PARAMETER VALUE (eg. set RPORT 3333)
+
+7) exploit  or  run  (can also use  exploit -z  to run it in background)
+
+10) happy hacking!

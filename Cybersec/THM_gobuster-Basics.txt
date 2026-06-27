@@ -1,0 +1,13 @@
+enumerates web directories, DNS subdomains, AWS S3 (Simple Storage Service) buckets, vhosts etc.
+by brute force
+
+
+Syntax:
+
+for directories:
+    gobuster dir -u "URL" -w WORDLIST -t THREADS
+    the more THREADS the faster
+
+you can view mode helps with gobuster MODE --help
+
+The room is bugged lol, will continue this later.

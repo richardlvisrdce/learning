@@ -1,13 +1,68 @@
 enumerates web directories, DNS subdomains, AWS S3 (Simple Storage Service) buckets, vhosts etc.
 by brute force
 
-
-Syntax:
-
-for directories:
+basic syntax (for directory enumeration):
     gobuster dir -u "URL" -w WORDLIST -t THREADS
     the more THREADS the faster
+    don't forget protocol in URL (eg. http://)
 
 you can view mode helps with gobuster MODE --help
 
-The room is bugged lol, will continue this later.
+The room is bugged lol, will continue this later. # why does this happen every other room smh
+
+________________________________
+
+Okay, the bug was that gobuster couldn't connect to the website they wanted us to enumerate (ww.offensivetools.thm)
+The fix was to add a line to /etc/hosts with TARGET_IP www.offensivetools.thm
+now just a basic gobuster enumeration succesfully found what we wanted.
+
+gobuster dir -u "http://www.offensivetools.thm" -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -t 64
+
+the other task was further enumerating a found directory and interesting .js files
+*** I replaced the directory name with "gummybears" and -r is probably not needed
+
+gobuster dir -u "http://www.offensivetools.thm/gummybears" -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -x .js -r
+
+then get the "interesting_file" (also a fake name)
+wget http://www.offensivetools.thm/gummybears/interesting_file.js
+cat interesting_file.js
+
+________________________________
+
+subdomain enumeration
+
+what is that?
+ - you know website.com
+ - you want service.website.com (eg. gemini.google.com)
+
+syntax
+ - gobuster dns -d website.com -w WORDLIST
+
+gobuster dns -d offensivetools.thm -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt --resolver TARGET_IP
+for some reason we are supposed to ignore duplicates with different casing btw
+
+________________________________
+
+vhost enumeration
+syntax
+ - gobuster vhost -u "http://website.com" -w WORDLIST
+
+# this command we straight up copied, so I will try to explain
+gobuster vhost -u "http://TARGET_IP" --domain offensivetools.thm -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt --append-domain --exclude-length 250-320
+
+explanation:
+gobuster vhost -u "http://TARGET_IP" # basic syntax
+--domain offensivetools.thm # sets top level domain to .thm and second level domain to offensivetools in the Hostname part of our request
+-w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt # a common wordlist for subdomains
+--append-domain # this appends offensivetools.thm to each wordlist entry, so that it resolves to a valid hostname
+--exclude-length 250-320 # this tries to filter out 404 etc. responses by size-filtering (supposedly doesn't work always but here it does)
+
+THE END.
+________________________________
+
+NOTES
+# if something is wrong with the dns resolving we can try this:
+the TARGET_IP www.offensivetools.thm that i put in /etc/hosts earlier can be changed to:
+TARGET_IP offensivetools.thm
+# this might help but also might not
+what I actually used with subdomain enum was --resolver TARGET_IP which worked

@@ -1,0 +1,69 @@
+DNS
+ - hostname/domain name to IP (on application layer)
+ - nslookup www.google.com
+ - record type AAAA refers to IPv6
+ - record type MX refers to email server
+
+WHOIS
+ - information about domain name (eg. who registered it, phone, email,...)
+ - whois google.com
+
+HTTP(s)
+ - GET (retrieve), POST (submit)
+ - PUT (create), DELETE (delete)
+ - usually port 80 or 443 (TCP)
+ - we can connect with telnet
+    - telnet SERVER_IP 80
+    - GET /file.html HTTP/1.1
+    - Host: SERVER_IP
+    - press enter twice
+    - retrieves file.html
+
+FTP
+ - USER (input username), PASS (enter password)
+ - RETR (download file), STOR (upload file)
+ - port 21 (TCP)
+ - we can connect with ftp
+    - ftp SERVER_IP
+    - enter some username and password if needed (not needed in lab)
+    - ls
+    - get file.txt
+    - quit
+    - now we have file.txt on our machine
+
+SMTP
+ - HELO (initiate SMTP session), MAIL FROM (set sender email adress), 
+ - RCPT TO (set recipient email adress), 
+ - DATA (beginning of message writing), . (end of message writing) 
+ - can connect with telnet but use email client instead pls
+
+POP3
+ - USER <username>, PASS <password>, LIST (show messages), 
+ - RETR <message_number>, DELE <message_number>, QUIT (quit session)
+ - port 110 (TCP)
+ - connect with telnet:
+    - telnet SERVER_IP 110
+    - LIST  #list messages
+    - RETR <message_number> # read message you want
+    - QUIT #bye
+
+IMAP
+ - LOGIN <username> <password>, SELECT <mailbox_folder>, 
+ - FETCH <mail_number> <data_item_name> (eg. fetch 1 body[] # fetches header+body of message 3)
+ - MOVE <sequence_set> <mailbox> (move messages to other mailbox)
+ - COPY <sequence_set> <data_item_name> (copy to other mailbox), LOGOUT
+
+
+cool table by TryHackMe (lab: Networking Core Protocols)
+
+Protocol	Transport Protocol	Default Port Number
+TELNET	        TCP	                23
+DNS	        UDP or TCP	            53
+HTTP	        TCP	                80
+HTTPS   	    TCP 	            443
+FTP	            TCP	                21
+SMTP	        TCP	                25
+POP3	        TCP	                110
+IMAP	        TCP	                143
+
+source: https://tryhackme.com/room/networkingcoreprotocols

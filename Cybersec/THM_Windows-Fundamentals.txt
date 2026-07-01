@@ -1,0 +1,16 @@
+NTFS 
+ = New Technology File System
+ - solves basic limitations that previous file systems had
+ - in today's world, it's a very unsurprising absolute minimum for common usage (eg. encryption, large files)
+
+don't accidentaly delete files in System32 folder
+Accoount types: Standart User, Administrator - they have different privileges (self-explanatory)
+Users can be seen in C:\Users\
+To get information about users we can use lusrmgr.msc
+
+UAC
+ = User Account Control
+ - When on an Administrator account, you don't run low-privilege tasks as Administrator
+ only when you actually need higher privileges are you prompted to confirm running the operation
+
+Task Manager can be opened with Ctrl+Shift+Esc

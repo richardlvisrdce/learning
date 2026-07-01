@@ -1,0 +1,43 @@
+MsConfig
+ - msconfig.exe
+ - cool tool for knowing how to run different tools
+   by their command (usualy C:\Windows\System32\tool_path.exe)
+   and for actually launching them
+ - in this lab, we launched everything through it
+ - diagnose startup issues
+ - general(which devices to load), boot options,
+   services (all services), startup, tools
+
+UAC
+ - UserAccountControlSettings.exe
+ - User Account Control
+ - can be turned off (you probably shouldn't do that though)
+
+Computer Management
+ - compmgmt.msc
+ - system tools, storage, services...
+ - eg. task scheduler, device manager, disk management...
+ - many more
+ - can run with compmgmt.msc
+
+System Information
+ - msinfo32.exe (launching from msconfig is cooler)
+ - not for average Joe
+ - HW Resources, Components, SW Environment
+
+Resource Monitor
+ - resmon.exe
+ - exactly what you'd expect
+ - CPU, Memory, Disk, Network usage
+
+Command Prompt
+ - cmd.exe
+ - commands. 
+ - For help type: command /?
+ - for detailed info: command /all
+ - eg. ipconfig, netstat
+
+Registry Editor
+ - regedt32.exe
+ - dangerous & powerful
+ - eg. SAM database

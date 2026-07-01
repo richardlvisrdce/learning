@@ -1,0 +1,35 @@
+Windows Update
+ - open in settings (Update and Security)
+ - check for updates, install updates, change settings
+ - Patch Tuesday
+
+____ Windows Security ____
+ - open in settings (Update and Security -> Windows Security)
+ - protection areas: eg. firewall, virus protection
+ - colour coded warning system (red is bad, green is ok)
+ - has four parts, that we will explore
+
+1) Virus & Threat Protection
+ - scan for threats (eg. Quick scan)
+ - exclusions - possible threats that we dismissed
+
+2) Firewall & Network Protection
+ - Domain/Private/Public network firewall settings
+ - Usually best to keep on
+
+3) App & Browser Control
+ - SmartScreen warns about malicious websites/downloads
+ - Exploit Protection protects against exploits (eg. buffer overflow)
+ - default settings usually suffice
+
+4) Device Security
+ - don't need to change this
+ - Core isolation, Security processor
+
+
+Bitlocker
+ - TPM = Trusted Platform Module (HW chip that can store encryption keys)
+ - Bitlocker encrypts your drives
+
+Volume Shadow Copy Service
+ - create snapshots of data to be backed up

@@ -1,0 +1,62 @@
+ISO/OSI
+ - 7 layers (from top to bottom)
+   - Application (eg. HTTP, FTP, SMTP)
+   - Presentation (eg. encryption, compression - JPEG, PNG)
+   - Session (eg. SSL, TLS)
+   - Transport (eg. TCP, UDP)
+   - Network (eg. IP addresses)
+   - Data Link (eg. MAC addresses - Ethernet, Wi-Fi)
+   - Physical (eg. cables, hubs, repeaters - optical, wireless signals)
+
+TCP/IP
+ - 4 layers (from top to bottom)
+   - Application (eg. HTTP, FTP, SMTP)
+   - Transport (eg. TCP, UDP)
+   - Internet (eg. IP addresses)
+   - Network Access (eg. MAC addresses - Ethernet, Wi-Fi)
+
+IP adresses
+ - 4 bytes (octets) in IPv4, 16 bytes in IPv6
+ - each byte has 8 bits, so an IP adress has numbers from 0 to 255 
+ - numbers are separated by dots in IPv4, colons in IPv6
+ - Public IP adresses - unique, can be accessed from the internet
+ - Private IPs - in local networks, not routable on the internet
+ - Private ranges (by RFC 1918):
+    - 10.0.0.0 - 10.255.255.255 (10/8)
+    - 172.16.0.0 - 172.31.255.255 (172.16/12)
+    - 192.168.0.0 - 192.168.255.255 (192.168/16)
+
+UDP
+ - connectionless protocol
+ - no guarantee of delivery, order or duplicate protection
+ - faster than TCP, used for streaming, gaming, VoIP
+
+TCP
+ - connection-oriented protocol
+ - guarantees delivery + order + duplicate protection (seq numbers, retransmission...)
+ - slower than UDP, used for web browsing, email, file transfer
+
+Encapsulation
+ - every layer adds its own header to the above layer (like a matryoshka doll)
+ - eg. a layer 3 (IP) packet contains a layer 4 (TCP/UDP) segment/datagram
+        and this IP packet is then encapsulated in a layer 2 (Ethernet) frame...
+ - you probably noticed that each layer's information has a diffeferent name
+ 
+ - applicacation data
+ - transport protocol segment (TCP) or datagram (UDP)
+ - IP packet
+ - Ethernet frame
+ - Physical layer bits (0s and 1s)
+
+Telnet
+ - network protocol
+ - allows for remote terminal connection
+ - unencrypted
+ - connect to a HTTP server:
+    - telnet www.example.com 80 (or telnet SERVER_IP 80)
+    - then type:
+        GET / HTTP/1.1
+        Host: www.example.com
+        (press enter twice)
+    - you get the HTML code of the page as a response
+    - Note: you could also use curl or wget to do this

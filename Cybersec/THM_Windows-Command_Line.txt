@@ -1,0 +1,47 @@
+default Windows CLI is cmd.exe
+
+____________________________
+commands:
+
+NETWORK
+
+set - gets your path (and a lot more info about everything)
+ver - OS version
+systeminfo - in-depth info about system (eg. processor and memory)
+ipconfig - network info
+ipconfig/all - more network info
+tracert - traceroute (tracert target_name)
+nslookup - nslookup host_or_domain returns its IP
+netstat - current network connections and listening ports (netstat -abon gets you a lot of ingo)
+____________________________
+
+FILESYSTEM
+
+cd - without params it works like pwd, with params it works as expected
+dir - display files 
+ - dir /a   # displays all (+hidden and system files)
+ - dir /s   # displays files in cur direcotry and its subdirectories
+tree - visual representation of directories
+mkdir/rmdir - create/delete directories
+type - similar to cat
+more - cat but just enough to fill your window (works like less)
+copy - copy file1 file2 (copies file1 to a new file called file2)
+move - move files, eg. move file.txt .. # moves file.txt one directory up
+del/erase - delete files
+* - wildcard, eg. copy *.txt
+____________________________
+
+TASKS,PROCESSES
+
+tasklist - running processes (allows for filters using tasklist /FI "imagename eq process.exe")
+ - eg. find processes related to notepad.exe -  tasklist /FI "imagename eq notepad.exe"
+taskkill - kill task (taskkill /PID target_pid)
+
+____________________________
+
+HAD ENOUGH OF WINDOWS?
+
+shutdown
+ - shutdown /s  # shut down system
+ - shutdown /r # restart system
+ - shutdown /a # abort scheduled shutdown

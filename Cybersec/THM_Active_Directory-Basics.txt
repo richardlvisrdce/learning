@@ -1,0 +1,38 @@
+Active Directory (AD)
+ - simplifies managing devices, users & services in corporate networks.
+
+Windows Domain
+ - group of users and computers 
+ - that are managed by a centralized server called a Domain Controller (DC).
+
+In a windows domain, credentials are stored in an Active Directory (a centralized database)
+
+Active Directory basic object types:
+ - Users - people or services
+ - Machines - each computer in the domain has a unique machine account
+ - security groups - domain admins, domain users, Domain Controllers, ...
+
+Organizational Units (OUs)
+ - define sets of users with similar roles or responsibilities
+ - eg. marketing will likely have a lot of users with similar permissions, 
+   so they can be grouped into an OU called "Marketing"
+
+
+we manage all this in Active Directory Users and Computers
+
+Group Policy Object (GPO)
+- To configure group policies, we create a GPO and link it to an OU.
+- like this we actually define what users in that OU can and can't do
+
+There are 2 protocol for network authentication in Windows domains:
+ - Kerberos (default)
+ - NetNTLM (legacy, less secure)
+
+In the lab there was a much too detailed explanation for a first-timer, so:
+ - Kerberos has tickets, used to auth users securely
+ - NetNTLM is a challenge-response protocol, which can be cracked offline if captured
+
+
+Trees - join domains together, forming a hierarchy (eg. company.com will have children domains uk.company.com and us.company.com)
+Forests - join trees together, forming a hierarchy (eg. company.com and company2.com are in the same forest) - useful for subsidiary companies
+Trust Relationships - join trees or forests (eg. uk.company.com (from company.com domain) will have access to resources in company2.com)

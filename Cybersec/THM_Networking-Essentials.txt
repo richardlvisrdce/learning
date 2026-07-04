@@ -1,0 +1,38 @@
+DHCP
+ - Dynamic Host Configuration Protocol
+ - used on IP networks to automatically assign parameters, such as:
+    - IP adresses
+    - router / gateway
+    - DNS server
+ - client-server, relies on UDP (server listens on port 67, client sends on 68)
+ - 4 steps: Discover, Offer, Request, Acknowledge (DORA)
+ - fun fact: in discover, the client broadcasts a DHCPDISCOVER message (to try finding the local DHCP server)
+
+
+ARP
+ - Adress Resolution Protocol
+ - translates IP to MAC
+ - used when 2 devices communicate on same WiFi / Ethernet
+    - to create a correct data link header 
+    - eg. Ethernet frame header, consisting of destination MAC, source MAC, type
+
+
+ICMP
+ - Internet Control Message Protocol
+ - network diagnostics & error reporting
+ - you surely know:
+    - ping - is target alive and can he reach us?
+    - traceroute - what route can we go from us to reach the target?
+
+Routing
+ - internet is big
+ - we use routing algorithms to find optimal routes
+ - eg. each router will have a complete map with OSPF (Open Shortest Path First)
+ - eg. a simple one for small networks is RIP (Routing Information Protocol)
+
+NAT
+ - Network Adress Translation
+ - there is a lot of devices (connected to internet)
+ - idea: have 1 public adress through which N private adresses connect to internet
+    - eg. company with 10 computers will connect through 1 public IP
+    - eg. household with 4 phones, 2 computers and a camera will connnect through 1 public IP

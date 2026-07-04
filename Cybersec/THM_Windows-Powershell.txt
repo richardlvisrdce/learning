@@ -1,0 +1,60 @@
+Why Powershell ?
+ - task automation & configuration management
+ - language built on .NET framework
+ - Windows differs from Linux (not everything is a file)
+ - Powershell allows object manipulation to suit windows better
+ - python classes - Dog has atribute breed and method Bark()
+ - Powershell object - object has properties (~atribute) and methods
+ - Powershell commands are known as cmdlets
+
+WTF is this language? Take me back to bash...
+ - everybody has to go through this eventually...
+ - usually commands are Verb-Noun (eg. Get-Content)
+ - Get-Command (every command you could ever need listed)
+ - Get-Help Set-Location (prints manual for Set-Location)
+ - Get-Help Get-Date -examples (gives you quite a few examples)
+
+ - to not die as a non-Windows person, there are aliases (Get-Alias), such as cd for Set-Location
+ - you can also download additional cmdlets with Find-Module -Name "SomeModule*" (yes, star wildcard)
+ - search for cmdlets that start with delete: Get-Command -Name "delete*"
+
+
+File System & Files
+ - Get-ChildItem == get-childitem == ls 
+  (list files, directories in -Path location (or current working directory))
+ - Set-Location == cd (eg. Set-Location -Path ".\Documents")
+ - New-Item -Path ".\Documents\NewDirectory" -ItemType "Directory"
+ - Remove-Item -Path ".\Documents\NewDirectory\"
+ - Get-Content -Path ".\textifile.txt"
+
+
+Piping, Filtering and sorting
+ - you can pipe objects in PS
+ - eg. Get-ChildItem | Sort-Object Length
+ - eg. Get-ChildItem | Where-Object -Property "Extension" -eq ".txt"
+ - there is -eq, -ne, -gt, -ge, -lt, -le for comparing
+ - you can also use Where-Object -Property "Name" -like "pattern*"
+ - you can combine PS and aliases
+    - eg. ls | sort -Descending | Select-Object -First 1 (gets biggest file)
+
+
+System and Network Information
+ - Get-ComputerInfo (detailed information)
+ - Get-LocalUser
+ - ipconfig, Get-NetIPConfiguration (similar network infos)
+ - Get-NetIPAddress (interface IPs, loopbacks)
+
+
+
+Real-Time system Analysis
+ - Get-Process (get running processes)
+ - Get-Service (status of services on the machine)
+ - Get-FileHash -Path .\file.txt
+ - Get-NetTCPConnection (displays what TCP stuff is running on which ports)
+ - 
+
+Scripting
+ - Invoke-Command (runs command on local and remote computers)
+    - from Get-Help Invoke-Command -examples:
+        Invoke-Command -FilePath c:\scripts\test.ps1 -ComputerName Server01
+ - eg. Invoke-Command -ComputerName CoolComputer -ScriptBlock { GetProcess }

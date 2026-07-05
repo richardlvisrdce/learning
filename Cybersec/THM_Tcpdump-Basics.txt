@@ -1,0 +1,25 @@
+tcpdump = capture packets
+to capture you have to be root or use sudo
+to read you don't need root
+tcpdump -r <file> = read packets from a file
+
+tcpdump - i <interface> -c <count> 'tcp port <port_number>'
+tcpdump -i eth0 -w <file> = write packets to a file
+tcpdump -i any -nn = capture packets on all interfaces and don't resolve hostnames or ports
+
+man pcap-filter 
+
+tcpdump host example.com = capture packets to and from example.com
+port 80 = capture packets on port 80
+tcp = capture TCP packets (works with udp, icmp, ip, arp, ...)
+
+can use logical operators to combine filters:
+ - and, or, not
+ - eg. tcpdump -i eth0 'tcp port 81 and host yourmom.com'
+
+greeater than and less than operators:
+ - eg. tcpdump -i eth0 'tcp port 80 and greater 1000' # 1000 bytes
+
+tcpflags:
+ - eg. tcpdump 'tcp[tcpflags] == tcp-ack' # capture only ACK packets
+ - eg. tcpdump -i eth0 'tcp port 80 and tcp[tcpflags] & (tcp-syn|tcp-ack) != 0' # capture SYN and ACK packets on port 80

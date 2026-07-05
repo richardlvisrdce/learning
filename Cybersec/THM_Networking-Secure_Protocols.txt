@@ -1,0 +1,45 @@
+TLS
+ - secure client to server communication over an unsecure network
+ - secure means ensuring confidentiality and integrity
+ - successor to SSL
+ - server (or client) need to create a CSR (Certificate Signing Request), 
+   then submit it to a CA (Certification Authority)
+ - there are also self-signed certificates (those don't prove authenticity)
+
+HTTPS
+ - HTTP is sent in cleartext, which is dangerous
+ - HTTPS is basically HTTP over TLS (if captured, the traffic is unreadable)
+ - default port 443 (HTTP has 80)
+
+SMTPS, POP3S & IMAPS
+ - same concept as with HTTP -> HTTPS (just add TLS)
+ - default ports:
+    - SMTPS - 465 and 587 (SMTP has 25)
+    - POP3S - 995 (POP3 has 110)
+    - IMAPS - 993 (IMAP has 143)
+
+SSH
+ - SSH = Secure Shell
+ - telnet is not secure (everything's sent in cleartext)
+ - in 1999 OpenBSD devs released OpenSSH (opensource, used a lot today)
+ - OpenSSH offers:
+    - pubkey, 2FA, password authentication
+    - protection of confidentiality, integrity
+    - tunelling (routing different protocols through SSH)
+    - running GUI apps over SSH (X11 forwarding)
+ - ssh user@host (or ssh user@IP), can use flag -X to run GUI apps
+
+SFTP & FTPS
+ - SFTP = SSH File Transfer Protocol (runs over SSH)
+ - FTPS = FTP over TLS (runs over TLS)
+ - both are secure alternatives to FTP
+ - default ports:
+    - SFTP - 22 (SSH has 22)
+    - FTPS - 990 (FTP has 21)
+
+VPN
+ - Virtual Private Network
+ - secure tunnel between 2 networks
+ - used to connect to a private network over the internet
+ - eg. OpenVPN (open source, using TLS)
+

@@ -1,0 +1,32 @@
+wireshark - a packet capture and analysis tool
+
+tcp packets have 4 "parts" that we can view (frame, ethernet, ip, tcp)
+http packet will also have an http part to them
+
+there was a lot of tasks that didn't really make much sense for me to explain,
+so this will mostly be a brief list of which parts we touched upon that may be useful.
+
+In menu we can do a lot of things, such as:
+find packet: "Edit -> Find Packet"
+go to packet: "Go -> Go to packet"
+start a new capture: "Capture -> Start"
+set and apply display filter: "Analyze -> Display Filters"
+get info about errors,warnings, etc.: "Analyze -> Expert Information"
+IP statistics (adresses, ports, protocols): "Statistics -> Endpoints"
+
+By right-clicking a packet, we can:
+ - Follow -> TCP Stream (or UDP, HTTP, etc.)
+    - this can be paired with finding specific text in the stream (a search bar appears)
+ - mark, time reference, ignore packets
+ - apply/prepare as filter
+
+
+Filtering (what to write in the filter bar):
+ - by IP: ip.addr==123.456.789
+ - by protocol: 
+    - tcp, udp, http, dns, etc. (just type the protocol name in the filter bar)
+        - also can filter for ports, methods and other
+            - tcp.port==80
+            - udp.port==53
+            - http.request.method==GET
+            - http.request.method==POST

@@ -1,0 +1,19 @@
+nmap is an opensource network scanner (est 1997)
+
+nmap -sn 123.456.789
+  - ping scan (no port scan)
+  - checks if host is up
+
+nmap -sT = TCP connect scan (sT, full 3 way handshake)
+nmap -sS = SYN scan (sS, stealthy) # you should run this with sudo
+
+by default nmap scans the 1000 most common ports (TCP and UDP)
+change this with -p flag (eg. -p- for all ports, -p 1-1000 for first 1000 ports, -p 80,443 for specific ports)
+
+nmap -O = OS detection
+nmap -sV = service & version detection
+nmap -A -T4 = aggressive full scan (OS detection, service detection, script scanning, traceroute)
+
+nmap -v = verbose output
+nmap -d = debug output
+nmap -oN = output to file (eg. -oN output.txt)

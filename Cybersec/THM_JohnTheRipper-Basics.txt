@@ -1,0 +1,62 @@
+John the Ripper (John)
+ - cracks various hashes by brute force
+ - dictionary attack (uses a wordlist and hopes for matches)
+ - we will be using Jumbo John (extended, supports more hashes)
+
+P vs NP
+ - P = Problems that can be solved in polynomial time
+ - NP = Problems that can be verified in polynomial 
+        but not guaranteed to be solved in reasonable time
+
+Basic syntax:
+john --wordlist=/usr/share/wordlists/rockyou.txt hash_to_crack.txt
+
+Workflow
+ - get hash.txt somewhere
+ - Download some kind of hash identifier (we will use hash-id.py)
+    - wget https://gitlab.com/kalilinux/packages/hash-identifier/-/raw/kali/master/hash-id.py
+ - copy your hash (cat hash.txt, Ctrl+C)
+ - python3 hash-id.py
+ - paste the hash in
+ - hopefully get 1-2 results (you get some HASH_TYPE, eg. MD5, SHA1)
+ - john --list=formats | grep -iF "HASH_TYPE"   # this will give you ACTUAl_HASH_TYPE to pass to john, eg. Raw-MD5
+ - now prepare your favourite wordlist (we use rockyou)
+ - john --format=ACTUAl_HASH_TYPE --wordlist=/usr/share/wordlists/rockyou.txt hash.txt
+ # for some very weak hashes, john will give you more than 1 password (eg. for MD5 you sometimes get 2)
+
+Cracking etc/shadow hashes
+ - unshadow [path to passwd] [path to shadow] > unshadowed.txt
+ - now you need to identify the hash type (eg. SHA512)
+    # note: etc/shadow formatting: $prefix$options$salt$hash (if you google the prefix, you will find the hash type)
+ - john --format=ACTUAl_HASH_TYPE --wordlist=/usr/share/wordlists/rockyou.txt unshadowed.txt
+
+Single Crack Mode
+ - mangling = sligthtly tweaking the words (eg. adding numbers, changing letters to symbols, ...)
+ - to use single mode, you prepend the hash with the username (eg. user:1efee03cdcb96d90ad48ccc7b8666033)
+ - you still need to know the hash type (you can use hash-id.py or google the prefix)
+ - john --single --format=ACTUAl_HASH_TYPE hash_to_crack.txt
+
+Custom Rules
+ - if you know what structure of passwords the target uses, you make a custom rule
+ - you edit john.conf (usually in /etc/john/john.conf)
+ - eg. cAz"[0-9] [!£$%@]"
+    c: Capitalises the first letter
+    Az: Appends to the end of the word
+    [0-9]: A number in the range 0-9
+    [!£$%@]: The password is followed by one of these symbols
+
+Cracking Password Protected Zip Files
+ - zip2john [options] [zip file] > [output file] (eg. zip2john zipfile.zip > zip_hash.txt)
+ - john --wordlist=/usr/share/wordlists/rockyou.txt zip_hash.txt
+ - unzip zipfile.zip
+ - enter the password
+
+Cracking Password Protected RAR Archives
+- rar2john [rar file] > [output file] (eg. rar2john rarfile.rar > rar_hash.txt)
+- john --wordlist=/usr/share/wordlists/rockyou.txt rar_hash.txt
+- unrar x rarfile.rar
+- enter the password
+
+Cracking SSH Keys with John
+ - ssh2john [id_rsa private key file] > [output file] (eg. ssh2john id_rsa > id_rsa_hash.txt)
+ - john --wordlist=/usr/share/wordlists/rockyou.txt id_rsa_hash.txt

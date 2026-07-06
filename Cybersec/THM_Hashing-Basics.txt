@@ -1,0 +1,48 @@
+Hash Functions
+ - there is no key
+ - any input converts to output of a fixed size
+   this output is called digest
+ - common algos:
+    - (* insecure) MD5 (Message-Digest Algorithm 5)
+    - (* insecure) SHA1 
+    - SHA256 (Secure Hash Algorithm)
+    * insecure due to vulnerabilities and collisions
+ - hash collision = 2 different inputs give same output
+
+
+Insecure Passsword Storage
+ - don't store passwords in plaintext (pls dont)
+ - don't use deprecated or insecure hashing algorithms (eg. MD5, SHA1)
+
+ - do add salt 
+ - do use strong algorithms (eg. SHA256, SHA512, bcrypt)
+
+
+Hashing for Secure Password Storage
+ - rainbow table = lookup table of hashes to plaintext
+ - websites like CrackStation use large rainbow tables to crack hashes
+ - note that if salt is properly used, rainbow tables are useless
+ - for automatic salting + hashing, use bcrypt (or scrypt, argon2)
+ - for storing we use hashing, not encyption
+ - if we used encryption, we still need to store the key, which is a single point of failure (bad)
+
+
+Passsword Hashes
+ - on linux used to be stored in /etc/passwd, now in /etc/shadow (only root can read)
+ - etc/shadow formatting: $prefix$options$salt$hash
+ - common prefix: $y$ = yescrypt (strong)
+
+
+Passsword Cracking
+ - GPU cracking is usually much faster than CPU
+ - some hashing algos, such as bcrypt, are designed so that GPU isn't much faster than CPU
+ - hashcat = hash cracking using GPU
+ - john = hash cracking using CPU
+ - online tools: CrackStation, Hahes.com
+
+Integrity Checking
+ - even a little change in input will change the hash output drastically
+ - this can be utilized to check integrity of files
+ - this can also be utilized to find duplicate files (same hash = same file)
+ - HMAC (Hash-based Message Authentication Code) = hash + secret key
+ - HMAC verifies integrity & authenticity of a data

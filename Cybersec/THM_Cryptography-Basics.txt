@@ -1,0 +1,43 @@
+Why cryptography?
+ - secure communication in an unsecure environment (eg. the internet)
+ - secure communication = confidentiality, integrity
+ - cryptography = secure communication + authenticity
+ - we need it every day (browsing internet, emails, banking, ...)
+
+plaintext = Hello World! (easily readable)
+cyphertext = U2FsdGVkX1+ (looks random)
+
+how do we get ciphertext?
+ - we need a key (eg. password, passphrase, random string)
+ - we need a cipher (eg. AES, RSA, DES, ...)
+ - we need to encrypt the plaintext with the key and cipher
+
+how do we get plaintext back?
+ - we need the same key (or private key in asymmetric encryption) and cipher
+ - we need to decrypt the ciphertext with the key and cipher
+
+Caesar cipher
+ - substitution cipher (replace letters with other letters)
+ - shift letters by a number of positions
+ - eg. shift letters by 3 (A->D, B->E, C->F, ...)
+   - plaintext:  HELLO
+   - ciphertext: KHOOR
+ - to decrypt:
+    - we need to know the shift number (key) 
+      and know that it's Caesar cipher
+
+Types of Encryption
+ - symmetric encryption (same key for encryption and decryption)
+    - eg. AES (still used now), DES (broken in 1999), 3DES (deprecated 2019)
+
+ - asymmetric encryption (different keys for encryption and decryption)
+    - eg. RSA (still used now), DH, ECC (Elliptic Curve Cryptography, still used now)
+    - slower than symmetric, more secure, uses public and private keys
+
+Mathematical operations often used in cryptography
+ - modulo = remainder after division (eg. 7 mod 3 = 1)
+    - modulo is used for hashing, key generation, and more
+    - we use very large prime numbers for asymmetric encryption (eg. RSA)
+
+ - XOR = excclusive OR, 1 if bits are different, 0 if same
+    - XOR is used for symmetric encryption, hashing, and more

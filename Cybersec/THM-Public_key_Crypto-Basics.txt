@@ -1,0 +1,79 @@
+Public key cryptography:
+ - also called asymmetric encryption
+ - uses a pair of keys (public and private)
+ - public key = freely shared, used for encryption
+ - private key = secret, used for decryption
+
+Terms that will come in handy:
+ - authentication = confirm identity of who we're talking with
+ - authenticity = verify that message is from who it says it's from
+ - integrity = verify that message hasn't been tampered with
+ - confidentiality = verify that message is only readable by intended recipient
+
+RSA
+ - public-key encryption algorithm
+ - based on the difficulty of factoring large prime numbers
+ - how large? very large (eg. 600+ digits)
+ - how does it work?
+    - generate 2 large prime numbers (p and q)
+    - calculate n = p * q
+    - calculate φ(n) = n - p - q + 1
+    - choose e so that it's relatively prime to φ(n) (eg. 65537)
+    - calculate d where d * e ≡ 1 (mod φ(n))
+    - public key = (n, e)
+    - private key = (n, d)
+- example:
+    - p = 157, q = 199
+    - n = p * q = 31243
+    - φ(n) = n - p - q + 1 = 30888
+    - e = 163
+    - d = 379
+    - public key = (31243, 163), private key = (31243, 379)
+    - to encrypt x = 13
+        - note: by a ** b I mean a to power of b
+        - Alice sends y = x ** e mod n = 13163 mod 31243 = 16341
+        - Bob decrypts by calculating x = y ** d mod n = 16341 ** 379 mod 31243 = 13
+
+Diffie-Helman (Key Exchange)
+ - shared secret between 2 parties on an unsecure channel
+ - without pre-existing shared secret
+ - based on discrete logarithm problem (hard to solve)
+ - how does it work?
+    - note: by x ** y I mean x to power of y
+    - Alice and Bob agree on the public variables - large prime number p and a generator g
+    - Alice chooses a secret integer a, computes A = g ** a mod p, and sends A to Bob
+    - Bob chooses a secret integer b, computes B = g ** b mod p, and sends B to Alice
+    - that was the key exchange - Bob has Alice's public key A and Alice has Bob's public key B
+    - Alice computes the shared secret s = B ** a mod p
+    - Bob computes the shared secret s = A ** b mod p
+    - notice that both computed the same value - their shared secret key called s
+
+SSH
+ = Secure Shell
+ - for a secure connection, we need to:
+    1) authenticate the server (recognize the server's public key fingerprint)
+    2) authenticate the client (identify ourselves and get authenticated)
+ - commonly, ssh users authenticate with a username and password (not the most secure)
+ - a more secure way is to use public key authentication (asymmetric encryption)
+ - usually we generate a key pair (pub and priv) using ssh-keygen (by default RSA)
+ - eg. ssh-keygen -t ed25519 (this is not RSA, also RSA has longer key length)
+ - your key file should have 600 permissions (or stricter)
+ - to actually use the key, you should specify it: ssh -i privateKeyFileName user@host
+
+Digital Signature and Certificates
+- Digital signatures verify authenticity + integrity of a digital message or document
+- used by doctors, lawyers, ... for documents, contracts, ...
+- your digital signature is often legally equal to your handwitten signature
+
+- Certificates
+    - only trusted when a root CA (Certificate Authority) say they trust the organization that signed them
+    - eg. commonly used for HTTPS to verify authenticity of the server (is it really facebook.com?)
+    - if you want HTTPS for your website, you need a TLS certificate which can be paid or free (eg. Let's Encrypt)
+
+PGP and GPG
+- PGP = Pretty Good Privacy -- used for encrypting and signing emails, files, ...
+- GPG = GNU Privacy Guard, a free and open-source implementation of PGP
+    - usage of GPG:
+        - gpg --full-gen-key # for generating
+        - gpg --import KeyName.key # import key from KeyName.key file
+        - gpg --decrypt message.gpg # decrypt

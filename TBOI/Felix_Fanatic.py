@@ -382,15 +382,64 @@ class Enemy:
         render_pos = (self.rect.x - 10, self.rect.y - 10)
         surface.blit(sprite, render_pos)
 
+def load_and_clean_magenta_sprites(base_path: str, file_names: list[str], target_size: tuple[int, int]) -> dict[str, pygame.Surface]:
+    """
+    clean magenta bg from pngs
+    """
+    cleaned_sprites = {}
+    
+    for name in file_names:
+        full_path = f"{base_path}{name}.png"
+        try:
+            # .convert() je nutný pro správnou bitovou hloubku a práci s PixelArray
+            img = pygame.image.load(full_path).convert()
+            
+            # 1. Odstranění fialového pozadí (čištění šumu)
+            pixel_array = pygame.PixelArray(img)
+            for x in range(img.get_width()):
+                for y in range(img.get_height()):
+                    raw_color = pixel_array[x, y]
+                    color_obj = img.unmap_rgb(raw_color)
+                    r, g, b = color_obj.r, color_obj.g, color_obj.b
+                    
+                    # Detekce magenty (vysoká červená a modrá, nízká zelená)
+                    if (r > g + 40 and b > g + 40) or (r > 200 and b > 200 and g < 100):
+                        pixel_array[x, y] = (0, 0, 0)
+                        
+            del pixel_array # Uvolníme zámek povrchu
+            
+            # 2. Nastavení colorkey na novou černou
+            img.set_colorkey((0, 0, 0))
+            
+            # 3. Změna velikosti na požadovaný rozměr
+            img = pygame.transform.scale(img, target_size)
+            
+            # Uložíme do slovníku pod čistým názvem (bez přípony)
+            cleaned_sprites[name] = img
+            print(f"Successfully loaded and cleaned sprite: {full_path}")
+            
+        except pygame.error as e:
+            print(f"Error loading sprite '{full_path}': {e}")
+            
+    return cleaned_sprites
+
+# TODO this is now for testing, in future - load this from another file
+BOSS_DIR = "TBOI/cat_version/bosses/veterinarian/"
+boss_files = ["front", "back", "left", "right"]
+boss_sprites = load_and_clean_magenta_sprites(BOSS_DIR, boss_files, (160, 160))
+
+equipment_files = ["rope", "needle"]
+# TODO needle doesnt have good scaling, otherwise works
+equipment_sprites = load_and_clean_magenta_sprites(BOSS_DIR, equipment_files, (80, 80))
+
+ui_files = ["hp_bar"]
+ui_sprites = load_and_clean_magenta_sprites(BOSS_DIR, ui_files, (400, 80))
 
 class Boss:
-    # vibecoded but there was no reason not to.
-    # need to move+shoot on their own so defo some AI. dmg - 1 heart
-    # need special attacks for each one, some will only have 1 attack, bosses will have like 3
     def __init__(self, x: int, y: int):
         self.rect = pygame.Rect(x, y, 120, 120)
         self.speed: float = 2.0
-        self.health: int = 25 # Takes 25 hairballs to kill - #TODO better is to have health bar and about 100hp
+        self.health: int = 25
         
         # AI states
         self.state = "moving"
@@ -399,8 +448,9 @@ class Boss:
         self.action_timer = 0
         self.shoot_cooldown = 0
         
-        # Placeholder visual until you get a sprite
-        self.color = (200, 50, 200) # Purple square
+        # Direction state for rendering
+        self.current_direction = "front"
+        self.color = (200, 50, 200)
 
     def update_and_move(self, player_rect, current_room: Room, enemy_projectiles: list):
         self.action_timer -= 1
@@ -410,33 +460,39 @@ class Boss:
         if self.action_timer <= 0:
             action = random.choice(["move", "shoot", "chase"])
             if action == "move":
-                # Pick a random spot in the room to walk to
                 self.target_x = random.randint(200, 1400)
                 self.target_y = random.randint(200, 1000)
-                self.action_timer = 60 # Walk for 1 second
+                self.action_timer = 60
             elif action == "chase":
-                # Walk directly to where the cat is right now
                 self.target_x = player_rect.centerx
                 self.target_y = player_rect.centery
                 self.action_timer = 90
             elif action == "shoot" and self.shoot_cooldown <= 0:
-                # Shoot a projectile directly at the cat
                 self._shoot_at_player(player_rect, enemy_projectiles)
                 self.action_timer = 30
-                self.shoot_cooldown = 60 # Can't shoot again immediately
+                self.shoot_cooldown = 60
 
-        # 2. Actually move towards the target_x, target_y
+        # 2. Calculate movement vector
         dx = self.target_x - self.rect.centerx
         dy = self.target_y - self.rect.centery
         distance = math.hypot(dx, dy)
 
+        # 3. Handle rotation based on movement (Only if NOT shooting right now)
+        # Action timer > 0 during the shoot action animation state
+        is_shooting_state = (self.action_timer > 0 and self.shoot_cooldown >= 45)
+        
+        if not is_shooting_state and distance > self.speed:
+            if abs(dx) > abs(dy):
+                self.current_direction = "right" if dx > 0 else "left"
+            else:
+                self.current_direction = "south" if dy > 0 else "back" # Using 'south' logic mapping to 'front' rendering below
+
+        # 4. Apply movement
         if distance > self.speed:
             dx /= distance
             dy /= distance
             self.rect.x += int(dx * self.speed)
             self.rect.y += int(dy * self.speed)
-            
-            # Basic screen clamp for the boss
             self.rect.clamp_ip(pygame.Rect(TILE_SIZE, TILE_SIZE, 1600 - 2*TILE_SIZE, 1200 - 2*TILE_SIZE))
 
     def _shoot_at_player(self, player_rect, enemy_projectiles: list):
@@ -447,18 +503,68 @@ class Boss:
         if distance > 0:
             dx /= distance
             dy /= distance
-            # Create a simple red projectile moving towards the player
-            enemy_projectiles.append(EnemyProjectile(self.rect.centerx, self.rect.centery, dx, dy))
+            
+            # Prioritize shooting direction over movement
+            if abs(dx) > abs(dy):
+                self.current_direction = "right" if dx > 0 else "left"
+            else:
+                self.current_direction = "front" if dy > 0 else "back"
+            
+            projectile_img = equipment_sprites.get("needle", default_kibble_img)
+            enemy_projectiles.append(EnemyProjectile(self.rect.centerx, self.rect.centery, dx, dy, image=projectile_img))
 
     def draw(self, surface):
-        pygame.draw.rect(surface, self.color, self.rect)
+        # Normalize direction naming fallback
+        direction = self.current_direction
+        if direction == "south": 
+            direction = "front"
+            
+        if direction in boss_sprites:
+            sprite = boss_sprites[direction]
+            render_pos = (self.rect.x - 20, self.rect.y - 20)
+            surface.blit(sprite, render_pos)
+        else:
+            pygame.draw.rect(surface, self.color, self.rect)
 
+def draw_boss_health_bar(surface: pygame.Surface, current_hp: int, max_hp: int):
+    if "hp_bar" not in ui_sprites:
+        return
+        
+    # Position the bar at the top center of the screen
+    x = 1600 // 2 - 400 // 2  # 600
+    y = 50
+    
+    # 1. Calculate health percentage
+    hp_pct = max(0.0, min(1.0, current_hp / max_hp))
+    
+    # 2. Draw the dynamic health fill behind the frame
+    # Inner dimensions matching the Gemini frame layout roughly
+    fill_width = int(280 * hp_pct) # Adjusted to fit inside the frame graphics
+    if fill_width > 0:
+        # Drawing a bright red/green indicator bar inside
+        # Position offset: x + 60, y + 25 (adjust these numbers to line up perfectly with your PNG)
+        fill_rect = pygame.Rect(x + 60, y + 25, fill_width, 30)
+        pygame.draw.rect(surface, (200, 30, 30), fill_rect)
+        
+    # 3. Draw the main frame texture on top
+    surface.blit(ui_sprites["hp_bar"], (x, y))
 
+# default enemy projectile
+# Procedural default kibble (brown ellipse) with transparency
+default_kibble_img = pygame.Surface((20, 15), pygame.SRCALPHA)
+pygame.draw.ellipse(default_kibble_img, (139, 69, 19), (0, 0, 20, 15))
 
 class EnemyProjectile:
-    def __init__(self, x: int, y: int, dx: float, dy: float):
-        self.rect = pygame.Rect(x, y, 20, 20)
-        self.speed: float = 8.0
+    def __init__(self, x: int, y: int, dx: float, dy: float, image: pygame.Surface = default_kibble_img, speed: float = 8.0):
+        self.image = image
+        # Dynamically set width and height based on the passed image
+        width = self.image.get_width()
+        height = self.image.get_height()
+        
+        # Center the projectile on the origin point (x, y)
+        self.rect = pygame.Rect(x - (width // 2), y - (height // 2), width, height)
+        
+        self.speed: float = speed
         self.dx = dx
         self.dy = dy
 
@@ -467,9 +573,9 @@ class EnemyProjectile:
         self.rect.y += int(self.dy * self.speed)
 
     def draw(self, surface):
-        # kinda red
-        pygame.draw.circle(surface, (255, 50, 50), self.rect.center, 10)
-
+        surface.blit(self.image, self.rect.topleft)
+        # if not visible, we can use a red circle:
+            # pygame.draw.circle(surface, (255, 50, 50), self.rect.center, 10)
 
 def load_room_by_type(room_type: str, floor: Floor_Manager, x: int, y: int) -> list[list[int]]:
     # JUST VIBES but looks great
@@ -706,6 +812,8 @@ while running:
         enemy.draw(virtual_screen)
     if boss is not None:
         boss.draw(virtual_screen)
+        # Draw the boss health bar UI on top
+        draw_boss_health_bar(virtual_screen, boss.health, 25) # 25 is max_hp right now
     for proj in enemy_projectiles:
         proj.draw(virtual_screen)
 

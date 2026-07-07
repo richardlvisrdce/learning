@@ -36,7 +36,7 @@ def remove_background_glow(image: pygame.Surface, mode: str = "magenta") -> pyga
 
 # --- NAČTENÍ A ÚPRAVA TESTOVACÍHO OBRÁZKU ---
 # Zde si doplň cestu k jednomu z tvých nepřátel, např. "TBOI/cat_version/enemy/beetle.png"
-IMAGE_PATH = "TBOI/cat_version/bosses/veterinarian/vet.png"
+IMAGE_PATH = "TBOI/cat_version/bosses/veterinarian/front.png"
 
 try:
     # .convert() je nutný, aby PixelArray správně fungoval s RGB formátem

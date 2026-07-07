@@ -1,0 +1,107 @@
+Overview
+ - Front end = what the user sees (eg. HTML, CSS, JS)
+    - HTML = structure of the page (eg. headings, paragraphs, images, links)
+    - CSS = style sheets (eg. colors, fonts, layout)
+    - JS = interactive elements (choices & decisions made by the user)
+
+ - Back end = what the user doesn't see (eg. PHP, Python, Node.js)
+    - database = a place where information is stored (eg. preferences, user accounts)
+    - other infrastracture like web servers, application servers, storage, ...
+    - WAF (Web Application Firewall) = optional, helps filter dangerous requests
+
+URL
+ = Uniform Resource Locator
+ - web adress that guides your browser to the correct place on the Internet
+ - scheme://domain:port/path?query_string#fragment
+ - eg. https://www.example.com:443/path/to/file.html?search=keyword#task1
+ 
+ - scheme = protocol used to access the website (HTTP, HTTPS,...)
+ - domain = which website you want to access (eg. www.example.com)
+ - port = direct your request to the right service on the web server (80 is HTTP, 443 is HTTPS)
+ - path = points to a specific resource on the web server (eg. /path/to/file.html)
+ - query_string = used for searching and inputs (eg. ?search=keyword)
+ - fragment = points to a specific section of the resource (eg. #task1)
+ - beware of typosquatting (websites with names similar to common websites to trick users)
+
+
+HTTP Messages
+ - HTTP = Hypertext Transfer Protocol
+ - packets sent between a user (client) and web server
+ - Request = client -> server, Response = server -> client
+ - Structure of a HTTP Message:
+    - Start line = what kind of message is being sent
+    - Headers = metadata or extra information about the message
+    - Empty line separating header and body
+    - Body = actual data (what user wants to send or what server responds w/)
+
+
+HTTP Request - Start line & Methods
+ - HTTP Request Start line = method + URL path + HTTP version
+    - eg. GET /path/to/file.html HTTP/1.1
+
+ - HTTP Methods:
+    - GET = fetch data w/o changing anything (can show as plaintext!)
+    - POST = send data to the server (eg. form submission)
+    - PUT = replace or update existing data on the server
+    - DELETE = remove something from the server
+    - there are other obscure methods (eg. PATCH, OPTIONS, HEAD, CONNECT, TRACE) but they are rarely used
+
+ - HTTP versions
+    - HTTP/0.9 = first version, only GET requests
+    - HTTP/1.0 = added headers, status codes, and more methods
+    - HTTP/1.1 = used today, adds persistent connections, chunked transfer encoding
+    - HTTP/2   = multiplexing, header compression (faster)
+    - HTTP/3   = uses QUIC instead of TCP (quicker, more secure)
+    - many websites still use HTTP/1.1
+
+
+HTTP Request - Headers & Body
+ - Headers = extra info about the request, commonly:
+    - Host = which website (eg. www.example.com)
+    - User-Agent = which browser (eg. Mozilla/5.0)
+    - Referer = where we came from (eg. https://ww.google.com)
+    - Cookie = session data (eg. session ID)
+    - Content-Type = type of data being sent (eg. application/json)
+ 
+ - Request Body = data sent to the server (eg. file upload)
+    - only present in POST, PUT, PATCH requests
+ 
+ - Request Encodings and forms
+    - URL Encoded
+        = key-value pairs, separated by & (eg. key1=value1&key2=value2), special chars URL encoded
+
+    - Form Data (multipart/form-data)
+        = multiple blocks -  used for file uploads, each part has its own headers
+
+    - JSON (application/json)
+        = JSON structured data (eg. {"key1": "value1", "key2": "value2"}), often used in APIs
+
+    - XML (application/xml)
+        = data inside labels (eg. <name> John</name>), also APIs but less common today
+
+HTTP Response - Start line & Status Codes
+ - HTTP Response Start line = HTTP version + status code + reason phrase
+    - eg. HTTP/1.1 200 OK
+
+ - Status Codes:
+    - 1xx = informational (eg. 100 Continue)
+    - 2xx = success (eg. 200 OK)
+    - 3xx = redirection (eg. 301 Moved Permanently, 302 Found)
+    - 4xx = client error (eg. 400 Bad Request, 404 Not Found)
+    - 5xx = server error (eg. 500 Internal Server Error)
+
+HTTP Response - Headers & Body
+    - HTTP response headers are basically key:value pairs
+    - required response headers:
+        - Date
+        - Content-Type
+        - Server
+
+
+HTTP Security Headers
+ - helps improve security by providing ways to defend against attacks (eg. XSS, clickjacking)
+ - common security headers:
+    - Content-Security-Policy (CSP) = restricts sources of content (eg. scripts, images)
+    - Strict-Transport-Security (HSTS) = enforces HTTPS connections
+    - X-Content-Type-Options = prevents MIME type sniffing (eg. nosniff)
+    - Referrer-Policy = controls amount of referrer info sent (eg. no-referrer, same-origin)

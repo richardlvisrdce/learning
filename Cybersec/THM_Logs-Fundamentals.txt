@@ -1,0 +1,48 @@
+logs
+ - traces of activity (such as an attack)
+ - used to investigate and analyze the incident.
+ - used for security events monitoring (detecting anomalous behavior in real-time)
+
+
+Log types
+ - System Logs
+    - helpful for troubleshooting issues in the OS
+    - system error events, system startup/shutdown events, system resource usage, etc.
+ - Security Logs
+    - help detect & investigate incidents (more security-related)
+    - authentication events, access control events, firewall events, etc.
+ - Application Logs
+    - contain events related to the application
+    - user interaction events, application changes, application update, etc.
+ - Audit Logs
+    - detailed info about system changes and user activity
+    - data access, user activity, system changes, etc.
+ - Network Logs
+    - events related to the network's incoming & outgoing traffic
+    - firewall logs, network traffic, network errors, etc.
+ - Access Logs
+    - detailed info aboout access to different resources
+    - webserver access logs, database access logs, API access logs
+
+Windows event logs analysis
+ - if you are a happy windows user, 
+    please open Event Viewer through the start menu
+ - if you are not a happy windows user, 
+    please open Event Viewer through system configuration
+ - Event Viewer = graphical utility to view logs in Windows
+ - Event IDs = unique identifiers for specific events 
+    4624 = successful logon,                  4625 = failed logon, 
+    4724 = attempt to reset account password, 4720 = account created, 
+    4634 = account logged off
+ - you will actually need to use event IDs to filter
+ - We used Filter Current Log button and typed the event ID we wanted
+
+Web server access logs analysis
+ = records of all requests made to the web server
+ - we will do this the hardcore way for no reason at all
+ - prepare your grep and less skills (or use cat and read it all) 
+    or awk you dirty little linux admin (joke)
+
+ - eg. When was the last POST request made by IP: “172.16.0.1”? 
+    # i chose the easy way out:
+    grep "172.16.0.1" access.log | grep "POST" access.log | less

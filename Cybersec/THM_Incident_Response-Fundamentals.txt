@@ -1,0 +1,51 @@
+incident response handles an incident from start to end
+At first it might be triage, then you might have to contain, eradicate it, recover
+
+security event = some suspicious activity (might be an incident)
+security incident = a confirmed security event (eg. malware infection, data breach, ransomware attack)
+
+There is a lot of security events, but not all of them have to be responded to.
+
+False positive = a security event that is not an incident (eg. a user accidentally clicked on a phishing email, but did not enter any credentials)
+True positive = something bad actually happened (eg. the prior user input his credentials and they were exploited)
+
+False positive - eg. fire alarm is triggered by smoke after cooking
+True positive - eg. the house is burning down
+
+Types of incidents:
+    - Malware infection = malicious program (eg. virus, ransomware)
+    - Security breach = unauthorized access to a system or data
+    - Data leaks = sensitive information is exposed
+    - Insider attacks = malicious activity from within the organization (eg. employee stealing data)
+    - Denial of service = attack that makes a system or network unavailable (eg. DDoS attack)
+
+SANS Incident response framework (PICERL):
+    - Preparation =  building the necessary resources to handle an incident (eg. policies, procedures, tools)
+    - Identification = looking for any abnormal behavio (eg. monitoring, alerts)
+    - Containment = minimize the impact of the incident (eg. isolate affected systems)
+    - Eradication = remove the cause of the incident (eg. malware removal)
+    - Recovery = restore affected systems to normal operation (eg. restore from backup)
+    - Lessons learned = analyze the incident and improve future response (eg. update policies, train staff)
+
+NIST incident response fw (relative to SANS):
+    - Preparation
+    - Detection and Analysis (maps to Identification)
+    - Containment, Eradication and Recovery (maps to those three)
+    - Post-Incident Activity (maps to Lessons learned)
+
+### this brief explanation (3 lines) was taken from the TryHackMe room "Incident Response Fundamentals" (https://tryhackme.com/room/incidentresponsefundamentals) ###
+SIEM: Security Information and Event Management Solution (SIEM) collects all important logs in one centralized location and correlates them to identify incidents.
+AV: Antivirus (AV) detects known malicious programs in a system and regularly scans your system for these.
+EDR: Endpoint Detection and Response (EDR) is deployed on every system, protecting it against some advanced-level threats. This solution can also contain and eradicate the threat.
+
+Playbook = set of instructions to follow when responding to a specific type of incident (eg. ransomware attack or phishing email)
+
+DON'T click on suspicious links!
+DON'T open suspicious attachments!
+DON'T insert random USB drives into your computer!
+
+DO keep your software up to date!
+DO use strong passwords and 2FA!
+DO ask for help if you are unsure!
+
+Thanks for reading through. Happy Hacking!

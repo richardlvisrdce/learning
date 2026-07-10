@@ -1,0 +1,66 @@
+Firewall
+ = security solution that inspects incoming and outgoing traffic of a device or network
+
+Types of firewalls
+ - Stateless Firewall
+    - just filters data based on predetermined rules
+    - doesn't correlate previous packets with current ones
+    - very fast, but not very secure
+    - operates on OSI layers 3 and 4
+
+ - Stateful Firewall
+    - does everything a stateless firewall does, but also
+      keeps track of previous connections (stores them in a state table)
+    - also operates on OSI layers 3 and 4
+
+ - Proxy Firewall (application-level gateway)
+    - acts as an intermediary between the private network
+    - can additionally filter based on content of all packets
+    - operates on OSI layer 7
+
+ - Next-Generation Firewall (NGFW)
+    - most advanced
+    - heuristic analysis (patterns of attacks)
+    - deep packet inspection
+    - intrusion prevention system (IPS) - block attacks in real-time
+    - can also detect and block sophisticated attacks
+    - has SSL/TLS inspection (decrypts and inspects encrypted traffic)
+    - operates on OSI layers 3, 4, 5, 6, 7
+
+Rules in firewalls
+ - instruction set that defines what traffic is allowed or denied
+ - Basic components of a firewall rule:
+    - Action (allow, deny, forward, log, etc.)
+    - Source IP address
+    - Destination IP address
+    - Protocol (TCP, UDP, ICMP, etc.)
+    - Port number
+    - Direction (inbound or outbound)
+ -     action     source        destination  protocol   port   direction
+ - eg. Allow   192.168.1.0/24      any         TCP      80     Outbound
+
+
+Windows defender firewall
+ - built-in firewall in Windows OS
+ - can be configured through GUI or command line (netsh)
+ - basic Network Profiles: 
+    - Private networks (connected to home network)
+    - Guest or Public networks (restaurant, coffee shop, etc.)
+ - you can create custom rules (I won't include the whole process here)
+ - as you might have expected, to actually configure stuff you need admin
+
+
+Linux iptables Firewall
+ - There are multiple options
+ - Netfilter
+    - framework with core firewall functionality
+    - iptables (older, widely used)
+    - nftables (newer, enhanced capabilities)
+    - firewalld (wrapper for nftables, easier to use - has pre-built configs)
+ - ufw
+    = Uncomplicated Firewall
+    - beginner friendly, easier interface
+    - can be used to configure whatever you would need in iptables
+    - don't want your kids to install virus?
+    - block all outgoing traffic with:
+        - ufw default deny outgoing

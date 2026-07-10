@@ -1,0 +1,58 @@
+# let the piggy snort
+# everyday is a zero-day
+IDS
+ = Intrusion Detection System
+ - firewall = gatekeeper, IDS = surveillance cameras
+ - firewall controls what traffic can pass
+ - IDS detects abnormal traffic goind out or inside the network
+ - IDS generates alerts and notifies security admins, but does not respond to the threat
+
+Types of IDS
+ - Host Intrusion Detection System (HIDS)
+    - monitors a single host for suspicious activity
+    - detailed but resource intensive + requires management on each host
+    - hard to manage in large networks
+ - Network Intrusion Detection System (NIDS)
+    - network based IDS solution - monitors whole networl
+    - centralized view of all the detections
+
+Detection modes
+ - Signature-Based IDS
+    - compares network traffic to a database of known attack patterns (signatures)
+    - effective against known threats, but not against new or unknown attacks
+    - eg. Snort
+    - quickest method
+
+ - Anomaly-Based IDS
+    - learns the normal behavior (baseline) of the network/system 
+    - detects deviations from this baseline (requires fine-tuning to avoid flood of false positives)
+    - can detect new or unknown attacks, but may generate false positives (anything weird is flagged)
+    - very much needed in todays world where everyday is a zero-day
+
+ - Hybrid IDS
+    - combines signature-based and anomaly-based detection methods
+    - aims to provide a balance between accuracy and coverage
+
+
+Snort
+ - feed the piggy
+ - open-source network intrusion detection and prevention system (NIDS/NIPS)
+ - uses a rule-based language to define traffic patterns and actions
+ - has built-in rules but you can add your own (or disable the default ones)
+ - Has 3 main modes
+    - Packet Sniffer = captures and displays network packets in real-time (no analysis)
+    - Packet Logger = real-time detection + alerts, logs network packets to disk (as PCAP) for later analysis
+    - Network Intrusion Detection = monitors traffic in real time, filters with rules, generates alerts for suspicious activity
+
+Snort usage
+ - main config file is snort.lua
+ - rules are in /rules
+ - custom rules are in /local.rules
+ - Rule format:
+action protocol source_ip source_port destination_ip destination_port rule_metadata(msg, sid, rev)
+eg. alert icmp any any -> $HOME_NET any (msg:"ICMP ping detected"; sid:1000001; rev:1;)
+(this alerts when an ICMP ping is detected from any source to any destination in the home network)
+
+# This is how we ran a PCAP analysis:
+cd /etc/snort #we have snort in /etc/snort
+sudo snort -q -l /var/log/snort -r CAPTURE_FILE.pcap -A alert_fast -c /etc/snort/snort.lua

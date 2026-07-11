@@ -1,0 +1,79 @@
+There is no 100% security.
+We only try to make it difficult for adversaries.
+
+CIA
+ - Confidentiality = only intended parties can access the data
+ - Integrity = data is not tampered with (and if it is, we can detect it)
+ - Availability = data is accessible when needed
+
+Authenticity = data is genuine and from a trusted source
+Non-repudiation = source cannot deny that they are source of the data
+
+Utility = data is useful and serves its purpose
+Possession = data is in the sole possession of the intended party
+
+DAD (opposite of CIA)
+ - ways of compromising the CIA triad
+ - Disclosure = attack on confidentiality (eg. data leak)
+ - Alteration = opposite of integrity (eg. data tampering)
+ - Destruction / Denial = opposite of availability (eg. DoS)
+
+Security models introduction:
+ -> Bell-LaPadula (BLP)
+    - focuses on confidentiality
+    - Simple security property ("no read up")
+        = a subject at a lower security level cannot read a higher security level object
+        - prevents access to sensitive info above the authorized level
+
+    - Star Security Property ("no write down")
+        = a subject at a higher security level cannot write to a lower security level object
+        - prevents disclosure of sensitive info to lower security levels
+
+    - Discretionary-Security Property
+        = uses an access control matrix to determine read/write permissions for subjects and objects
+    - not designed for file-sharing
+
+ -> Biba
+    - focuses on integrity (thus it is the opposite of BLP)
+    - Simple Integrity Property ("no read down")
+        = higher integrity subject should not read from a lower integrity object
+
+    - Star Security Property ("no write up")
+        - a lower integrity subject should not write to a higher integrity object
+
+    - "read up, write down" properties
+    - can't handle insider threats
+
+-> Clark-Wilson 
+    - focused on inegrity
+    - Constrained Data Item (CDI) = data type whose integrity to protect
+    - Unconstrained Data Item (CDI) = all data types other than CDI
+    - Transformation Procedures (TP) = operations (like read & write) that should maintain integrity of CDIs
+    - Integrity Verification Procedures (IVP) = checks and ensures validity of CDIs
+
+
+Defence-in-Depth = multi-level security system (eg. lock the bank door, have a guard and a locked bank vault)
+
+ISO/IEC 19249
+-> Architecture Principles
+    - Domain Separation = separate domains for different security levels
+    - Layering = multiple layers of security controls (Defence-in-Depth)
+    - Encapsulation = hide implementation details of a system from users
+    - Redundancy = have backup systems in case of failure (eg. RAID)
+    - Virtualization = use VMs and sandboxing to isolate and protect systems
+
+-> Design Principles
+    - Least Privilege = give users only minimum necessary privileges
+    - Attack Surface Minimisation = reduce the number of entry points for attackers (eg. disable unused services)
+    - Centralized Parameter Validation = validate input within one library or system
+    - Centralized General Security Services = eg. centralized authentication
+    - Preparing for Error and Exception Handling = systems should be designed to fail-safe
+
+
+
+Trust but Verify = always verify even if we trust the entity and its behaviour (it might be compromised)
+
+Zero Trust = never trust any entity, always verify (eg. assume the entity is compromised)
+
+Zero Trust is more secure but also more limiting
+

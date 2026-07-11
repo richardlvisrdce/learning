@@ -1,0 +1,69 @@
+FlareVM
+ = "Forensics, Logic Analysis, and Reverse Engineering"
+ - collection of specialized tools for "unraveling digital mysteries"
+ - analyzing malware behaviour, complex details within executables, ...
+ - for reverse engineers, malware analysts, incident responders, forensics, pentersters
+ - it's supposedly a bit difficult to build (we didn't cover this)
+
+Tools list (not exhaustive):
+    - Reverse Engineering: 
+        - Ghidra = reverse engineering suite (open-source, by NSA)
+        - x64dbg = debugger for binaries in x64 and x32 formats (open source)
+        - OllyDbg = debugger for reverse engineering at assembly level (free)
+        - Radare2 = sophisticated reverse engineering platform (open source)
+
+    - Disassemblers and decompilers
+        - CFF Explorer = PE file editor + analysis tool (PE = Portable Executable)
+        - Hopper Disassembler = debugger, disassembler & decompiler.
+        - RetDec = decompiler for machine code (open source)
+
+    - Static & dynamic analysis
+        - Process hacker = memory editor + process watcher (free, open source)
+        - PEview = PE file viewer (free)
+        - DIE (Detect It Easy) = packer, compiler and cryptor detection (cryptor = A tool used by cybercriminals to encrypt and obscure malicious code)
+    
+    - Forensics & Incident response
+        - Volatility = RAM (memory) forensics framework (open source)
+        - FTK Imager = disc image creation & analysis tool (free)
+    
+    - Network analysis
+        - Wireshark = network protocol analyzer (open source)
+        - Nmap = network mapping (open source)
+        - Netcat = read/write across network connections (open source)
+
+    - File analysis
+        - FileInsight = hex editor + file analysis utility (free, originally by McAfee)
+        - Hex Fiend = hex editor for macOS (open source)
+        - HxD = binary viewer with a hex editor (+much more, free Windows app)
+    
+    - Scripting
+        - Python (mainly automation focused modules)
+        - PowerShell Empire = post-exploitation framework (open source)
+
+What do I do with a malicous file? (practical part)
+ - Part 1
+ - we received windows.exe (a malicious file)
+ - open PEStudio, open the file
+ - the absolute first thing to do is to check the file's hash (SHA256, SHA1, MD5)
+ - put the hash into VirusTotal to see if it's known malware (try multiple hashes and other websites aswell)
+ - in version section (metadata) we found some russian text (very sus)
+ - there is no rich header, indicating that the file is potentially packed or obfuscated
+   (packed = compressed, obfuscated = hidden, this is typical for sophisticated malware to avoid detection)
+
+ - we can also use FLOSS to analyze, but it's not as visually appealing and there isn't really more info.
+    - open powershell and run FLOSS.exe .\windows.exe > windows.txt
+    - now open windows.txt in notepad or wherever
+
+ - Part 2
+ - we will analyze network connectivity of cobaltstrike.exe
+ - first we ran it (don't do this at home)
+    - we opened process explorer
+    - clicked on the process properties and viewed the tcp/ip tab to see which IPs it connects to
+ - then we ran it again (don't do this at home)
+    - we opened procmon and filtered for "process name contains cobalt"
+    - we saw it connecting in real-time (looked like it was connecting to a C2 server)
+
+Actual practical task
+ - we analyzed 3 malicious files
+ - we used mainly PEStudio (static analysis)
+ - to actually see network activity we opened a pre-made pcap of cobaltstrike.exe in Wireshark, filtering for the C2 IP

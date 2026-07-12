@@ -1,0 +1,32 @@
+https://owasp.org/Top10/2025/
+
+IAAA
+ - how to think about users' actions are verified on apps
+    - Identity - the unique account (eg. username, ID)
+    - Authentication - proving the identity
+    - Authorization - what the user is allowed to do
+    - Accountability - record and track who did what and when
+
+The following are IAAA failures.
+
+A01: Broken Access Control
+ - the server doesn’t properly enforce who can access what
+ - a common ocurrenco of this is IDOR (Insecure Direct Object Reference)
+    - eg. We have a URL: https://bank.example/accounts?id=3
+    - if we change id to anonther number (eg. id=4), we can see another user’s account
+ - IDOR is usually a form of either:
+    - horizontal privilege escalation (same level, different user)
+    - vertical privilege escalation (jumping to admin level)
+
+A07: Authentication Failures
+ - the server can't reliably verify a user's identity
+ - username enumeration, weak passwords (+ no rate limits)
+   logic flaws in login flow, insecure session or cookie handling
+ - eg. we registered as aDmiN and the app let us through as admin
+
+
+A09: Logging & Alerting Failures
+ - applications don't record or alert on security events
+ - makes it much harder for defenders to detect and analyze attacks
+ - missing auth events, vague error logs, unreliable alerting
+ - eg. no alerts for a brute-force attack, thus the attacker had a lot of time to compromise the system

@@ -1,0 +1,18 @@
+https://owasp.org/Top10/2025/
+
+A04: Cryptographic Failures
+ - sensitive data isn't adequately protected
+ - never embed access credentials in source code
+
+
+A05: Injection
+ - injection = mishandled user input that is interpreted as code (eg. SQL)
+ - always validate user input, assume malicious qualities
+ - The practical task was SSTI (server side template injection) in a Jinja2 template
+   I tried this: {{__import__('os').popen('flag.txt').read()}}
+   correct payload was: {{ request.application.__globals__.__builtins__.open('flag.txt').read() }}
+
+
+A08: Software or Data Integrity Failures
+ - Another weird practical task: 
+    craft a payload that uses pickle's __reduce__ to execute open('flag.txt').read()

@@ -1,0 +1,40 @@
+https://owasp.org/Top10/2025/
+
+AS02: Security Misconfiguration
+ - unsafe defaults, incomplete settings, exposed services, ...
+ - not code bugs but configuration mistakes
+ - eg. Uber 2016/2017 publicly exposed AWS S3 bucket with sensitive data
+ - today it's a lot of exposed API keys by vibecoders
+ -> How to protect ?
+    - secure default configurations
+    - remove unused features, services, and accounts
+    - keep software, frameworks, containers up to date
+
+AS03: Software Supply Chain Failures
+ - applications rely on third-party software, libraries, and dependencies
+ - these can be compromised, outdated, or vulnerable
+ - supply chain attacks are often automated, hard to detect and very damaging
+ - eg. SolarWinds
+ -> How to protect ?
+    - verify all components before use
+    - keep dependencies up to date
+    - lock down CI/CD pipelines to prevent tampering
+
+AS04: Cryptographic Failures
+ - sensitive data is not properly encrypted
+ - weak or missing encryption, poor key handling, ...
+ - using MD5 or SHA-1 for password hashing, storing passwords in plaintext
+ -> How to protect ?
+    - use strong, modern cryptography (eg. AES-CGM, ChaCha20-Poly1305)
+    - use secure key management services (eg. AWS KMS, HashiCorp Vault)
+    - key rotation, key lifecycle management
+
+AS06: Insecure design
+ - system is built on flawed logic or architecture
+ - Flawed assumptions about user or model behaviour, Missing guardrails
+ -> How to protect ?
+    - threat modeling, secure design principles, security reviews
+    - human review for critical components
+    - monitoring and testing
+
+None of the practical tasks made sense to include here (+ they were not very good - eg. directory enumeration which requires uncommon wordlists, converting js to python)

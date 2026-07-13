@@ -1,0 +1,38 @@
+CyberChef
+    - web-based tool 
+    - data transformations and analysis 
+    - you can download it or open it in your browser
+      https://gchq.github.io/CyberChef/
+
+Components
+    - Operations = data transformations (eg. enc/decoding, enc/decryption)
+    - Recipes = sequence of operations
+        - there are three icons, as follows:
+        - Save recipe
+        - Load recipe
+        - Clear recipe
+    - Input = you can input text, hex, base64, etc.
+        - you can have multiple tabs
+        - upload a folder or file as input
+    - Output
+        - save to a file
+        - copy to clipboard
+
+Thought process 
+ - set a clear objective - what do I want to accomplish?
+ - Put your data in the input section
+ - Choose the right operations to achieve your objective
+ - Check output and adjust objective / operations if needed
+
+Extractors
+ - extract data from input
+ - eg. extract email addresses, IP addresses, URLs, etc.
+
+Date and Time
+ - converts time formats
+ - eg. UNIX to datetime string (and back)
+
+Data Format
+ - base encodings and other data formats
+ - base64, URL, Base85 (more efficient base64)
+ - base62 (alphanumeric, more compact than base64)

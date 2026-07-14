@@ -1,0 +1,17 @@
+
+TakeOver CTF
+ - https://futurevera.thm/
+ - this is not a 4 minute ctf as advertised...
+ - the trick was to curl for a non-existing subdomain and then filter that response size
+ - curl -I -k -H "Host: abfoiabfawdiol.futurevera.thm" https://10.114.170.4
+ - now the ffuf with -fs 0,4605
+ - ffuf -H "Host: FUZZ.futurevera.thm" -u https://10.114.170.4/ -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-110000.txt -fs 0,4605
+ - lets add it to /etc/hosts
+ - echo "10.114.170.4 support.futurevera.thm blog.futurevera.thm" | sudo tee -a /etc/hosts
+ - Okay. I had to look this up:
+    - after accessing support.futurevera.thm
+    - we click on the sites certificate
+    - in it's DNS Name, there is a weird subdomain
+    - if you add it to /etc/hosts,
+    - this subdomain resolves to some domain containing the flag
+    - wtf

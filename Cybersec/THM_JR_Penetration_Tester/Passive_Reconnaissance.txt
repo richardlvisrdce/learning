@@ -1,0 +1,59 @@
+Passive recon
+ - gather intel from public sources 
+ - without contacting the target directly
+ - eg. DNS records, WHOIS, social media, other public sources
+ - defenders use automated scanners to check their passive footprint
+
+Active recon
+ - direct engagement with the target (walking up to doors & testing locks)
+ - eg. port scanning, vulnerability scanning, social engineering, physical reconnaissance
+
+WHOIS
+ - registration info for domains or IP addresses. Some info can be hidden by privacy services
+ - eg. registrant name, organization, address, phone number, email address, domain creation and expiration dates
+ - it's being replaced by RDAP:
+    - RDAP = Registration Data Access Protocol
+    - RDAP uses https
+    - RDAP returns structured JSON
+    - overall: RDAP > WHOIS
+ - whois:
+    - whois <domain> (eg. whois google.com)
+    - or you can try to use web: https://whois.icann.org/
+    - 
+ - RDAP:
+    - you can optionally use jq for parsing the JSON output (just install jq and pipe the output to it)
+    - else it's just curl
+    - curl -s https://rdap.verisign.com/com/v1/domain/tryhackme.com
+    with the jq:
+    - curl -s https://rdap.verisign.com/com/v1/domain/tryhackme.com | jq .
+    - or use web: https://lookup.icann.org/
+
+nslookup and dig
+ - dig is modern and preferred
+ - nslookup:
+    - nslookup <domain> (eg. nslookup google.com)
+    # IPv4 via Cloudflare resolver
+    - nslookup -type=A tryhackme.com 1.1.1.1 
+    # mailservers
+    - nslookup -type=MX
+ - dig:
+    - dig <domain> <records_tyoe> (eg. dig google.com A) (A is DNS A records)
+    # mailserver records through Cloudflare
+    - dig @1.1.1.1 tryhackme.com MX
+
+DNSDumpster
+ - can also deal with subdomains, unadvertised domains
+ - https://dnsdumpster.com/
+ - we found admin.tryhackme.com (OMG!!!)
+ - dnsdumpster also has graphs for subdomain,IP,mail server relations
+ - for certificate transparency, we can use https://crt.sh/
+    - if you want all subdomains, search: %.tryhackme.com
+    - https://crt.sh/?q=%25.tryhackme.com
+
+Shodan.io
+ - yes, it had to come up. yes you should go try it right now and not read this.
+ - search engine for internet-connected devices (IoT, cameras, etc.)
+ - you can do some search tricks:
+    - hostname:<domain>
+    - port:<port> country:<country> (eg. port:22 country:US)
+    - http.component:"<component>" (eg. http.component:"WordPress")

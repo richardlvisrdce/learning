@@ -1,0 +1,61 @@
+This is not a THM room, just something I never truly understood and now I need it.
+
+find = search for files (eg. by name, type, size, ...)
+ - find <path> <options> "text_to_search_for"
+ - super basic searching
+    # -i = case insensitive, -iname = case insensitive name search
+    = find . -iname "filename.txt"
+    = find . -iname "*.txt"
+ - basic search
+    # search for all .txt files in current directory and subdirectories (-type d would be directory)
+    = find . -type f -name "*.txt"
+ - tricks
+    - supress permission denied errors
+        = find . -type f -name "*.txt" 2>/dev/null
+        if we dont have /dev/null
+        = find . -type f -name "*.txt" 2>&1 | grep -v "Permission"
+    - search whole system and supress errors
+       = find / -name "id_rsa" 2>/dev/null
+       = find / -name "id_rsa" 2>&1 | grep -v "Permission"
+    - search for specific permisions (eg. -4000 = SUID = runs as root)
+        = find / -perm -4000 -type f 2>/dev/null
+
+
+grep = search for text in files (by content, regex, ...)
+ - grep <options> "text_to_search_for" <file(s)>
+ - basic search
+    = grep -iF "text_to_search_for" <file(s)>  
+    # -i = case insensitive, -F = fixed string (no regex => faster + you can search for special characters)
+
+ - recursive search from cur directory
+    = grep -rin "sometext" .
+
+ - search a huge part of the system for a specific text (eg. username)
+    - trick 1: exclude directories that are not relevant (eg. /proc, /sys, /dev)
+        # this also utilises -s to suppress permission denied errors (we dont always have /dev/null access)
+        = grep -rins --exclude-dir={proc,sys,dev,tmp} "username" /
+        # + exclude binary files
+        = grep -rinsI --exclude-dir={proc,sys,dev,tmp} "username" /
+        NOTE: mac(zsh) might have problems with {} so put it in quotes: "{proc,sys,dev,tmp}"
+
+    - trick2: shorter, excludes binary files (also utilises -s)
+        grep -rinsI "username" /
+
+
+
+together = absolute power
+
+the syntax is a little weird, xargs makes it a bit more readable but it's not necesarry.
+here we also use -print0 and -0 to handle filenames with spaces or special characters (good practice)
+
+find . -type f -name "*.txt" -print0 | xargs -0 grep -iF "text_to_search_for"
+
+this can also be done without piping and xargs
+find . -type f -name "*.txt" -exec grep -HiF "text_to_search_for" {} +
+
+
+________________________________________________________________________
+possible solution to THM Attackbox refusing to type special characters:
+setxkbmap cz
+go back with setxkbmap us
+or try setting yourself to us keyboard

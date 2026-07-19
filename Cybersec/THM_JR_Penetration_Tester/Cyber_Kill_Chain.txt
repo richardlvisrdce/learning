@@ -1,0 +1,52 @@
+Cyber Kill Chain
+ - cyber security attack model developed by Lockheed Martin (2011)
+
+
+7 stages of an attack:
+
+1. Reconnaissance
+    - attacker gathers information about the target (eg. IP addresses, domain names, email addresses, employee names, social media profiles)
+    - passive (eg. searching public records)
+        - WHOIS - contact information, registration details, domain owners (unless hidden by a privacy service)
+        - DNS databases - IP addresses
+        - Websites (socials, google dorking, ...) - employee names, email addresses, company information
+    - active (eg. scanning the network)
+        - port scanning
+        - vulnerability scanning - identify weaknesses in public services
+        - physical reconnaissance - identify entry points, security measures, personnel behavior
+
+2. Weaponization
+    - attacker creates a malicious payload (eg. malware, exploit) and a delivery method (eg. phishing email, USB drive)
+    - countermeasures: user training, disable/uninstall unnecessary features/software (eg. macros)
+
+3. Delivery
+    - attacker delivers the payload to the target (eg. email attachment, drive-by download, social engineering)
+    - phishing emails - eg. attach invoice.pdf.exe to trick the user
+    - spear phishing - targeted phishing attack (eg. to a specific employee)
+    - malvertising - malicious ads on legitimate websites (eg. pop-ups, banners)
+    - physical delivery - eg. USB drive left in a public place, infected with malware
+    - SMS phishing (Shishing) - eg. text with instructions to download malware
+
+4. Exploitation
+    - attacker exploits a vulnerability in the target system to execute the payload
+    - password brute-forcing, phishing, social engineering
+    - zero-day exploit = an unknown vulnerability that has not been patched yet
+    - buffer overflow, SQL injection
+    - countermeasures: MFA, good password policies, IDS/IPS
+
+5. Installation
+    - attacker installs malware on the target system to get persistent access (eg. backdoor, rootkit)
+    - countermeasures: endpoint protection, application allowlisting, regular patching
+
+6. Command and Control (C2)
+    - attacker establishes a communication channel with the compromised system to control it remotely (eg. C2 server, botnet)
+    - How do they do this?
+     - use common encrypted protocols (eg. HTTPS, DNS, SMTP) to evade detection
+     - use legitimate services (eg. cloud storage, social media - eg. X) to hide C2 traffic
+     - use domain generation algorithms (DGA) = creates a large number of domain names with an algorithm - malware will iterate over them to find an active one (if blocked, finds another one)
+     - use fast flux = frequently changing IP addresses for a domain name to evade detection
+    - countermeasures: network monitoring, anomaly detection, honeypots, .....
+
+7. Actions on Objectives
+    - attacker achieves their goal (eg. data exfiltration, ransomware encryption, sabotage)
+    - countermeasures: data loss prevention (DLP), network segmentation, backups, having a basic plan

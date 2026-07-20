@@ -1,0 +1,63 @@
+active recon
+ - directly interacting with target to gather info
+ - leaves traces in logs, IDS alerts, etc. (passive recon does not)
+ - visiting websites, pinging hosts, tracing routes, connecting to ports, ...
+
+Web
+ - developer tools overview:
+    - network tab = see all requests/responses, headers, cookies
+    - console tab = see JS errors, run JS commands
+    - sources tab = files loaded by the page
+    - application tab = cookies, local/session storage
+
+ - browser extensions:
+    - FoxyProxy = manage proxies for intercepting or routing traffic
+    - User-Agent Switcher = change user-agent string (emulate different browsers/devices)
+    - Wappalyzer = identify technology stack (eg. CMS, JS frameworks, databases)
+    - BuiltWith = similar to Wappalyzer, but sometimes detects different things
+    - WhatRuns = lightwight alternative to Wappalyzer
+
+Ping
+ - ping = test connectivity to a host
+ - uses ICMP echo request/reply (type 8 and 0, respectively)
+ - ping -c 5 <IP_or_hostname> = send 5 pings
+ # on windows use ping -n 5 <host>
+ - ping -4 -c 5 <host> = force IPv4
+ - ping -6 -c 5 <host> = force IPv6
+
+Traceroute
+ - traceroute = discover IPs of routers (hops) between you and a host
+ - note that the path is not always same
+ - How it works:
+    - exploits TTL to find the routers
+    - each router decrements TTL by 1
+    - when TTL=0, router sends ICMP Time Exceeded message back
+    - sending packets with increasing TTL always reveals n-th router (n = TTL)
+    - we do this until we reach the destination host
+ - traceroute <host> (Linux/macOS)
+ - tracert <host> (Windows)
+ - traceroute -6 <host> = force IPv6
+ - usually uses UDP, but we can force TCP or ICMP if we get blocked
+    - traceroute -T <host> = TCP
+    - traceroute -I <host> = ICMP
+ 
+ - mtr <host> = real-time path monitoring (like traceroute + ping)
+
+Telnet
+ - 1969
+ - cleartext
+ - TCP port 23
+ telnet <host> <port>
+ # press enter
+ GET / HTTP/1.1
+ # press enter
+ host: telnet
+ # now press enter twice
+
+Netcat
+ - listening and connecting to ports
+ - nc <IP> <port> = connect to a port
+ - nc -lvnp <port> = listen on a port
+ - nc -6 -lp <port> = listen for IPv6
+ - TCP or UDP
+ 

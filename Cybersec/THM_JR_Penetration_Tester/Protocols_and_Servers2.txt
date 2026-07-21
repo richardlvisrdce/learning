@@ -1,0 +1,97 @@
+
+I assume you've heard of:
+ - protecting CIA (Confidentiality, Integrity, and Availability)
+ - attack aims to DAD (Disclosure, Alteration, and Denial)
+
+modern attacks:
+ - sniffing (only works against misconfigured networks and legacy systems)
+ - MITM (only works when you don't have: HSTS - HTTP Strict Transport Security or certificate pinning)
+ - password attacks (using credential stuffing, password spraying and breach dbs)
+
+
+Sniffing attack
+ - sniffing = capturing network traffic
+ - devastating if:
+    - the traffic is unencrypted (eg. telnet, FTP, HTTP)
+        - IoT is often not encrypted
+    - after a succesful other attack (eg. MITM to strip TLS)
+ - wireshark or tcpdump with filters (such as port 23 for telnet or imap in wireshark)
+
+MITM
+ - Man-in-the-Middle attack
+ - person A thinks they are talking to person B, but they are actually talking to the attacker (E)
+ - attacker can for example:
+    - eavesdrop (passively listen to the conversation)
+    - modify (actively change the conversation - eg. change a bank account number in a transaction)
+ - tools:
+    - Ettercap
+        - classic MITM tool for LANs
+        - Bettercap is generally better
+    - Bettercap
+        - succesor to Ettercap
+        - ARP spoofing, DNS spoofing, HTTP/S proxying, ...
+    - mitmproxy
+        - interactive HTTPS proxy
+        - modification, inspection of traffic
+        - analysing and manipulatins HTTP/S communications
+    - Responder
+        - for Windows networks
+        - exploits name resolution protocols, such as LLMNR, NBT-NS
+        - tricks victims to send authentication credentials to attacker
+
+How do they do MITM attacks?
+ - ARP spoofing (effective on local networks)
+    - attacker sends fake ARP messages 
+        to associate their MAC address with the IP of the target
+        so this traffic will be sent to the attacker instead of target
+ - DNS spoofing
+    - fake DNS responses to redirect traffic to a malicious site
+    - can happen eg. by responding faster than the legitimate DNS server
+ - Rogue access point
+    - attacker sets up a fake Wi-Fi
+    - eg. "Airport Free" in an airport
+    - now all traffic goes through attacker
+ 
+ - BGP hijacking
+    - BGP = Border Gateway Protocol (used to route traffic on the Internet)
+    - attacker announces false BGP routes to route traffic through their infrastructure
+    - sophisticated, typically targets specific organizations or regions
+
+TLS
+ - is cool, secures protocols (like anything, it can be bypassed)
+ port overview:
+
+ HTTP	80	HTTPS	443
+ FTP	21	FTPS	990
+ SMTP	25	SMTPS	465
+ POP3	110	POP3S	995
+ IMAP	143	IMAPS	993
+
+ - you can also secure other, eg. DNS (DoT = DNS over TLS, DoH = DNS over HTTPS)
+ - HTTP = establish TCP connection, send HTTP over it
+ - HTTPS = establish TCP connection, establish TLS connection, send HTTP
+
+SSH
+ - Secure Shell
+ - secure remote access to a system
+ - port 22
+ - authentication methods:
+    - password = simple, vulnerable to brute-force attacks
+    - public key = recommended, private + public keys, server has public and challenges client to prove they have privat
+    - certificates = similar to public key, but with a CA (Certificate Authority), making managing keys easier
+    - multi-factor auth = eg. key + one time password (OTP), authenticator app or hardware token
+    - multi-tractor auth = for farmers, not recommended
+
+ - generate keys with ssh-keygen
+ - ssh -p <port> <user>@<host> = connect on a non-standard port
+ - ssh -i <key_path> <user>@<host> = connect with a specific private key
+
+Password attacks
+ - use hydra or medusa to brute-force passwords
+ - best methods:
+    - credential stuffing = using leaked credentials from a breach to try on other services (eg. email + password)
+    - password spraying = trying a few common passwords on many accounts (eg. "Password123" on all users)
+    - brute-force = trying all possible combinations (best if combined with some knowledge and applied with a mask)
+ - hydra -l username -P wordlist.txt server service
+    - this works for ssh, ftp, imap, ...
+ - http-form-post = for web login forms (this one has weird syntax)

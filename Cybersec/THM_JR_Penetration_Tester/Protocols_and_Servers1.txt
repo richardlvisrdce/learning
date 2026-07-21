@@ -1,0 +1,71 @@
+
+telnet
+ - is insecure
+ - sent in cleartext
+ - default tcp port 23
+
+HTTP
+ - nginx, apache, IIS (Microsoft)
+ - http/1.1 = the most common version
+ - http/2 = binary, multiplexed, header compression, server push
+ - http/3 = QUIC (UDP-based), faster, more secure
+
+FTP
+ - replaced by SFTP (SSH File Transfer Protocol) or FTPS (FTP secure) or SCP (Secure Copy Protocol)
+ - usage:
+    - ftp <host>
+    - user <username>
+    # enter password
+    - ls
+    - get <filename>
+
+Mailing
+ - MUA (Mail User Agent) = email client (eg. Thunderbird, Outlook, webmail)
+ - MSA (Mail Submission Agent) = receives from MUA, checks for errors and forwards it
+ - MTA (Mail Transfer Agent) = routes and delivers mails between servers
+ - MDA (Mail Delivery Agent) = stores the mail in recipient's mailbox
+
+SMTP
+ - Simple Mail Transfer Protocol
+ - for sending emails
+ - port 25 for server-to-server communication (MTA <-> MTA)
+ - port 587 for client-to-server communication (MUA <-> MSA), typically authenticated
+
+
+POP3
+ - Post Office Protocol version 3
+ - for receiving emails
+ - port 110 is default POP3 using cleartext (some servers allow upgrade to TLS using STLS)
+ - port 995 is POP3S (over implicit TLS), encrypted
+ - possible usage:
+    - telnet <host> 110
+    - user <username>
+    - pass <password>
+    - LIST (list of messages)
+    - RETR <message_number> (retrieve)
+    - QUIT
+
+IMAP
+ - Internet Message Access Protocol
+ - for receiving emails
+ - more used than POP3
+ - port 143 = default IMAP using cleartext (many times you can STARTTLS)
+ - port 993 = IMAPS (over implicit TLS), encrypted from the start
+ - requires each message to be preceded by a random string (tag) to track replies
+
+
+protocol ports overview:
+HTTP 80
+HTTPS 443
+
+FTP 21
+FTPS 990
+
+SMTP 25
+SMTPS 465
+
+POP3 110
+POP3S 995
+
+IMAP 143
+IMAPS 993

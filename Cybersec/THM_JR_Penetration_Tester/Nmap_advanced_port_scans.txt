@@ -1,0 +1,86 @@
+you should understand nmap basic port scans or used nmap by now.
+
+Advanced scans overview
+ - Null = TCP packet with no flags set (open ports will not respond, closed will)
+ - FIN = probes ports w/o initiating a connection
+ - Xmas = set FIN, PSH, URG to probe behind stateless firewalls
+ - Maimon = FIN and ACK, exploits a bug/feature in some BSD-derived systems
+ - ACK = map firewall rules (not to find open ports)
+ - Window = looks at TCP Window field in RST response to determine open/closed ports
+ - Custom = --scanflags to craft own TCP flag combos
+
+Evasion and spoofing techniques
+ - spoofing IP = forge source IP with -S (traffic appears to come from different host)
+ - spoofing MAC = forge source MAC with --spoof-mac (need to be on same local network as target)
+ - decoy scan = mix your IP with multiple decoy adresses using -D
+ - fragmented packets = split packets into smaller IP fragments with -f or -ff (bypass firewalls and IDS)
+ - idle/zombie scan = use idle third-party host with -sl to scan target without revealing your IP
+
+Null scan
+ - TCP packet with no flags set
+ - sudo nmap -sN <TARGET>
+
+FIN scan 
+ - TCP packet with FIN flag set
+ - sudo nmap -sF <TARGET>
+ - response = closed (RST,ACK)
+ - no response = open or blocked by firewall (some firewalls silently drop packets)
+
+Xmas scan
+ - TCP packet with FIN, PSH, URG flags set
+ - sudo nmap -sX <TARGET>
+ - response (RST-ACK) = closed
+
+Maimon scan
+ - TCP packet with FIN and ACK flags set
+ - sudo nmap -sM <TARGET>
+ - response (RST) = closed
+
+ACK scan
+ - ACK flag set
+ - sudo nmap -sA <TARGET>
+ - only actually works when there is a firewall
+ - helps to map firewall rules
+
+Window scan
+ - similar to ACK scan, examines TCP Window of the RST packets returned
+ - sudo nmap -sW <TARGET>
+ - only actually works when there is a firewall
+
+Custom scan
+ - custom combination of TCP flags 
+ - sudo nmap --scanflags <FLAGS> <TARGET>
+ - eg. nmap --scanflags RSTSYNFIN <TARGET>
+
+
+Spoofing and Decoys
+ - spoof source IP (requires root)
+ - nmap -S <SPOOFED_IP> <TARGET>
+ - usually you would like to 
+    - disable ping scan (-Pn)
+    - specify network interface (-e)
+    - nmap -e <NET_INTERFACE> -Pn -S <SPOOFED_IP> <TARGET>
+ - sometimes you might want to
+    - if you're on the same ethernet or wifi:
+      spoof mac (--spoof-mac <SPOOFED_MAC>)
+
+ - decoy scan (-D)
+ - the next command makes your IP appear in third order
+ - nmap -D <DECOY_IP1>,<DECOY_IP2>,ME,<DECOY_IP3> <TARGET>
+
+
+Fragmented packets
+ - eg. split 24 byte header into 3 fragments
+ - sudo nmap -sS -p80 -f <TARGET>
+ - if you add -ff it will split them into multiples of 16 (instead of 8)
+ - eg. make packets bigger to make them look normal
+ - --data-length NUM
+
+Idle/Zombie scan
+ - refer to the spoofing techniques overview above
+ - nmap -sI ZOMBIE_IP <TARGET>
+
+you can add --reason to get nmap's reasoning
+-v for verbose output
+-d for debugging
+

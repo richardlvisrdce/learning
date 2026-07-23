@@ -1,0 +1,19 @@
+
+if you get blocked by a paywall window
+ you can try to bypass it by:
+ - inspecting the page
+ - setting the paywalls display to none
+
+debugger
+ - usually good for going thoruhg JS code
+ - inspect
+ - debugger
+ - pretty print the JS code
+ - set breakpoints (eg. on timeout functions)
+ - refresh the page and step through the code to see what it does
+
+Storage
+ - here we can inspect cookies and local/session storage
+ - good for examining cookie values and flags (eg. HttpOnly, Secure)
+    - Secure = cookie only sent over HTTPS
+    - SameSite = cookie only sent for same-site requests (helps mitigate CSRF attacks)

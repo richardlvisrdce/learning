@@ -1,0 +1,43 @@
+
+classifiying port in 2 states as open or closed is usually not enough...
+
+nmap considers 6 port states:
+ - open
+ - closed
+ - filtered (nmap can't access it so it doesn't know - usually firewall)
+ - unfiltered (accessible but nmap doesn't know - usually when you do ACK scan with -sA)
+ - Open|Filtered (one of the two)
+ - Closed|Filtered (one of the two)
+
+TCP flags
+ - URG = urgent (incoming data is urgent and shouldn't wait for previous segments)
+ - ACK = acknowledge (acknowledges receipt of previous segment)
+ - PSH = push (pass the data promptly pls)
+ - RST = reset (reset the connection - eg. sent by firewall)
+ - SYN = synchronise (initiate a 3-way TCP handshake and sync sequence numbers)
+ - FIN = finish (no more data to send)
+
+TCP Connect scan
+ - complete 3-way handshake (only option if you're not root)
+ - nmap -sT <TARGET>
+ - SYN -> SYN/ACK -> ACK -> close()
+ - close() = FIN -> ACK -> FIN -> ACK
+
+TCP SYN scan
+ - requires root privileges
+ - sudo nmap -sS <TARGET>
+ - SYN -> SYN/ACK -> RST
+
+UDP scan
+ - nmap -sU <TARGET>
+ - there is no "connection" with UDP
+ - if we get no response, the port is open. else we get ICMP port unreachable
+
+
+Scope & Performance
+ -> nmap -p- <TARGET> = scan all ports (1-65535)
+ -> nmap -p <PORTS> <TARGET> = scan specific ports (eg. -p22,80,443 or -p1-100)
+ -> T<0-5> = scan timing (0 = slowest, 5 = fastest, usually T4 (aggressive) is enough for a fast scan)
+    - note: if you wanna scan the whole internet, use masscan and not nmap
+ -> --min-rate or --max-rate = set min/max packets per second (eg. --min-rate 1000)
+ -> --min-parallelism or --max-parallelism = set min/max parallel probes (eg. --min-parallelism=64 for minimum 64 parallel probes)

@@ -1,0 +1,24 @@
+
+service detection
+ - nmap -sV <TARGET> = service & version detection
+ - is not stealthy (has to complete TCP handshake)
+ - -sV --version-light = faster
+ - -sV --version-all = more thorough
+
+OS detection
+ - nmap -sS -O <TARGET> = OS detection (requires root)
+ - nmap -sS -O --traceroute <TARGET> = OS detection + traceroute (requires root)
+
+Nmap scripting engine (NSE)
+ - lot of scripts, lots of categories and functions
+ - default scripts will suffice in most cases
+ - nmap -sS -sC <TARGET> = default scripts
+ - sudo nmap -sS -n --script "<SCRIPT_NAME>" <TARGET>
+    - get algorithms (categories + names) which the target supports
+    - eg. sudo nmap -sS -n --script "ssh2-enum-algos" <TARGET>
+
+Save output to file
+ - I just use nmap <TARGET> -o <FILE> but there is also this:
+ - nmap -oN <FILE> <TARGET> = save output to file in normal format
+ - nmap -oG <FILE> <TARGET> = save output to file in grepable format
+ - nmap -oX <FILE> <TARGET> = save output to file in XML format

@@ -1,0 +1,59 @@
+
+network segment = group of computers connected using a shared medium
+subnetwork = one or more segments connected to the same router
+network segment - physical connection
+subnetwork - logical connection
+
+when ICMP echo is blocked, we can use TCP/UDP to check whether target responds.
+
+a ping goes
+ - from source to switch
+ - switch to router
+ - *optionally router to router
+ - router to switch
+ - switch to target
+ - and back
+
+nmap -sL target
+ - list scan, no packets actually sent to target
+ - resolves hostnames and IPs
+ - returns a list of IPs and hostnames (good for knowing what you're scanning)
+
+nmap -PR -sn TARGETS
+ - ARP scan on a local network (without port scanning)
+ - TARGETS can be specified as some subnet (eg. 10.10.10.10/24)
+
+nmap -PE -sn TARGET_SUBNET
+ - ICMP echo scan on a subnet (w/o port scanning)
+
+nmap -PP -sn TARGET_SUBNET
+ - ICMP timestamp scan on a subnet (w/o port scanning)
+ - ICMP timestamp request (type 13) is sent to the target
+ - will get timestamp replies (ICMP type 14)
+ 
+
+nmap -PM -sn TARGET_SUBNET
+ - ICMP adress mask queries (w/o port scanning)
+ - ICMP type 17 (replies are type 18)
+
+
+nmap -PS -sn TARGET_SUBNET
+ - TCP SYN ping scan (w/o port scanning)
+ - you need root to send only SYN (otherwise nmap will just do the whole 3-way handshake)
+
+nmap -PA -sn TARGET_SUBNET
+ - TCP ACK ping scan (w/o port scanning)
+ - you need root
+
+nmap -PU -sn TARGET_SUBNET
+ - UDP ping scan (w/o port scanning)
+
+massscan
+ - very fast
+ - generates a lot of traffic
+ - separate ports with commas (-p80,443) or ranges (-p1-100)
+ - eg. massscan TARGET_SUBNET -p <ports>
+ 
+reverse DNS lookup
+ - nmap -R
+ - can add --dns-servers <DNS_SERVER> to use a specific DNS server

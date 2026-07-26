@@ -1,0 +1,52 @@
+
+
+robots.txt
+ - tells search engine crawlers which pages to index
+ - only a guideline (pleas mr robot do not visit secret_passwords.txt pls pls)
+
+sitemap.xml
+ - tells search engine crawlers which pages the owner wants listed
+ - sometimes includes old pages or hard-to-reach pages
+
+headers and framework stack
+ - curl <TARGET_FULL_URL> -v
+ - sometimes leaks server version or framework or straight up leaks info such as admin portals etc.
+
+google dorking
+ - advanced search operators
+ - site:<domain> <search_term> (eg. site:tryhackme.com admin)
+ - inurl:admin
+ - filetype:pdf
+ - intitle:"this is a title"
+ - intext:password
+ - cache:<url> (eg. cache:tryhackme.com) shows the cached version of the page
+
+wappalyzer - browser extension, detects technologies + website uses + frameworks + much more
+
+OSINT
+ - wayback machine
+    - https://web.archive.org/
+ - github
+    - API keys, credentials, config files and .env files
+ - S3 buckets
+    - https://{name}.s3.amazonaws.com
+
+gobuster
+- automated open-source enumeration tool
+ - for directory and file discovery
+    - gobuster dir -u "<TARGET_FULL_URL>" -w /path/to/wordlist
+    - usually we use SecLists for wordlists (the medium size ones are fine)
+ - for more about gobuster you can read my Cybersec/THM_gobuster-Basics.txt
+
+subdomains and vhosts
+ - a cool command to learn (you will have to add the target ip to /etc/hosts for this to work)
+    - echo <TARGET_IP> <TARGET_NAME> | sudo tee -a /etc/hosts
+    - eg. echo 256.256.256.256 example.ex | sudo tee -a /etc/hosts
+
+ - note that: --wildcard forces enumeration, even when wildcard DNS is detected (may return false positives)
+ - gobuster dns -d example.thm -w <BIG_WORDLIST_PATH> --wildcard
+ 
+ - note that: filter sizes might have to be tweaked for your target.
+ - gobuster vhost -u "http://<TARGET_IP>" --domain example.ex -w <BIG_WORDLIST_PATH> --append-domain --exclude-length 250-320
+
+

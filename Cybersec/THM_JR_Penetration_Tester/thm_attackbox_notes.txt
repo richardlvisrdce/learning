@@ -1,0 +1,2 @@
+
+ctrl + option + somethin = try putting a special char on mac to the attackbox

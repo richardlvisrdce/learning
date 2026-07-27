@@ -1,0 +1,50 @@
+
+
+
+Repeater enables us to:
+ - modify and resend intercepted requests to a target
+ - send them repeatedly (nobody expected the spanish inquisition)
+
+Interface sections:
+ - request list (the "tabs" on the upper left)
+ - request controls (right of the Send button)
+ - request / response views (main area)
+ - inspector = analyze & modify requests (easier than raw editing, right-hand side)
+
+you can edit basically anything in the request, including:
+ - request query parameters (mainly GET requests)
+ - URL (eg. testing traversal, injection)
+ - body (only POST requests)
+ - method (GET, POST, PUT, DELETE, ...)
+ - headers
+
+Workflow
+ - setup foxyproxy or whatever (port: 8080, hostname: 127.0.0.1, type: http (https can cause problems, refer to a better guide))
+ - intercept a request in Proxy
+ - send to repeater (right click or Ctrl+R)
+ - you have to Send to get any response (becuase of the proxy)
+ - analyze the request and response
+ - modify the request (eg. change a parameter, add a header, try different URL)
+ - send again and analyze the response
+
+Practical sql injection task
+ - turn on proxy in browser
+ - intercept on
+ - saw a page in format page/about/<id>
+ - captured a request to page/about/2
+ - sent to repeater
+ - let's try to cause an error by adding a '
+ - modified the URL to page/about/2'
+ - send
+ - 500 internal server error
+ - analyze the response
+ - found a SQL query that handled the id in the request
+ - SELECT name,role,bio FROM people WHERE id = 2'
+ - now for some sql injection
+ - sent a modified URL - page/about/2' OR '1'='1
+ - doesnt work
+ - let's try UNION (the room told us to)
+ - /about/0 UNION ALL SELECT column_name,null,null,null,null FROM information_schema.columns WHERE table_name="people"
+ - we found out a notes column we want and found CEO's ID (1)
+ - 0 UNION ALL SELECT notes,null,null,null,null FROM people WHERE id = 1
+ 

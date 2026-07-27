@@ -1,0 +1,21 @@
+
+
+Interface (Extensions -> Installed)
+ - extensions list (the box in the upper middle)
+ - manage extensions (right-hand side)
+    - Add
+    - Remove
+    - Up/Down (change order of execution, important)
+        - the order is descending by default
+ - extension details (lower half)
+    - Details (name, version, description)
+    - Output
+    - Errors (useful for debugging/troubleshooting)
+
+Extensions -> BApp Store
+ - search for extensions
+ - install/uninstall extensions
+ - update extensions
+
+you can write your own extensions in Java, Python (via Jython), or Ruby (via JRuby)
+if you want to do that, check out PortSwigger's official documentation: https://portswigger.net/burp/extender/writing-your-first-burp-suite-extension

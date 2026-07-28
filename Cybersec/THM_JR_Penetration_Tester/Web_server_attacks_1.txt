@@ -1,0 +1,58 @@
+TARGET_IP = 10.113.169.30
+
+you should have a basic understanding of:
+ - Modern_web_stacks.txt
+
+useful commands
+ - curl -I <URL:PORT> = check headers
+ - curl -s <URL:PORT> = silent (no load-bar/errors shown, can be combined with -I)
+ - curl -s http://10.113.169.30:PORT/nonexistent-page-xyz = check error pages
+ - nikto -h <FULL_URL:PORT> = scan for known vulnerabilities
+
+Python HTTP server
+ - python3 -m http.server 8000 = servers current directory over HTTP on port 8000
+ - it serves the entire directory (even dotfiles like .env), with no access control
+ - curl -s http://10.113.169.30:8000/
+ - downloading files:
+    - curl -s http://10.113.169.30:8000/FILENAME -o FILENAME
+    - wget http://10.113.169.30:8000/<FILENAME>
+
+Apache2
+ - firstly check Server header for version
+ - curl -SI http://10.113.169.30:80
+ - if misconfigured, you could see these pages
+    - directory index
+    - http://10.113.169.30/files/
+    - apache status
+    - http://10.113.169.30:80/server-status
+ - use gobuster dir -u <URL:PORTL> -w <WORDLIST> -x bak,txt,html -t 20 to find hidden directories (or unlinked files)
+ - use searchsploit, metasploit, nikto, etc. to find vulnerabilities
+ - apache 2.4.49 is vulnerable to CVE-2021-41773 (RCE)
+
+Node.js (Express)
+ - refer to Modern_web_stacks.txt for more info
+ - enumerating routes via debug endpoints
+ - curl -s http://10.113.169.30:3000/api/routes
+ - exposed env variables
+ - curl -s http://10.113.169.30:3000/api/debug/env
+ - static file serving (express apps usually use express.static() middleware)
+ - once we know routes from /api/routes we check what is being served statically
+ - curl -s http://10.113.169.30:3000/static/config.js
+
+Nginx
+ - look for server header
+ - curl -sI ...
+ - or check error pages (often gives away version)
+ - curl -s http://10.113.169.30:8080/nonexistent-path
+ - misconfigured nginx_status endpoint
+    - secure config restricts access to localhost only
+    - misconfigured allows anyone access
+    - curl -s http://10.113.169.30:8080/nginx_status
+ - config files are in /etc/nginx/ (exposed directories in /etc/nginx/sites-available/ )
+ - if /files is exposed you can directly download the files
+ - wget http://10.113.169.30:8080/files/<FILENAME>
+
+Common misconfigurations
+ - look for them with nikto
+ - nikto -h http://10.113.169.30:80 -nointeractive
+    - it found all the things we talked about

@@ -1,4 +1,4 @@
-secure your DOOR guys
+secure your DOOR guys or get e-BOLA
 
 IDOR
  = Insecure Direct Object Reference

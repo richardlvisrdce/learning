@@ -1,0 +1,34 @@
+secure your DOOR guys
+
+IDOR
+ = Insecure Direct Object Reference
+   the server does not verify 
+   that the authenticated user has permission
+   to interact with the specific object they are requesting.
+
+ - eg. we got an invoice from onlinestore
+    - https://onlinestore.thm/order/1234/invoice
+    - we can change the invoice number to 1000
+    - https://onlinestore.thm/order/1000/invoice
+    - the server shows us the invoice for order 1000 (not ours)
+
+ - category: Broken Access Control
+ - same root cause as BOLA (Broken Object Level Authorization)
+
+exploiting IDOR
+ - usually requires decoding value from the request (eg. base64, hex, etc.)
+ - I would use cyberchef
+ - modify the decoded value to a different object ID (eg. order number, user ID)
+ - re-encode the modified value (with the same encoding method!)
+ - send the modified request to the server
+ - if server returns other user's data, we won
+
+hashed identifier in a request
+ - which algorith was used to hash the identifier?
+ - length helps
+   - MD5 = 32 characters
+   - SHA1 = 40 characters
+   - SHA256 = 64 characters
+ - use hash-identifier or hashid on Kali
+ - hash a range of likely input values and compare
+ - try to find out patterns

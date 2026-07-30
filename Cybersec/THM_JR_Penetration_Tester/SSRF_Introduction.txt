@@ -1,0 +1,38 @@
+
+SSRF
+ = Server-Side Request Forgery
+ - allows an attacker to
+    - cause the server-side application to make HTTP requests to a chosen destination
+ - regular SSRF - response is visible (back-end request shows up on front-end)
+ - blind SSRF - response is not visible
+
+Examples
+-> Path Traversal in the URL
+   - https://website.thm/stock?url=/item/123/details
+   - we can try to access the admin panel by changing the URL to
+   - https://website.thm/stock?url=/item/../admin
+   - the server will make a request to https://website.thm/admin
+-> Full URL in a Parameter
+   - we have https://server.website.thm/api/item?id=2
+   - we want to acess https://server.website.thm/flag?id=9
+   - we use the &x= trick to cause whatever the app appends to the URL to be neutralised
+   - https://website.thm/item/2?server=server.website.thm/flag?id=9&x=
+
+Best method to prevent this?
+ - Whitelisting (allowlisting)
+    - better than blacklisting (denylisting)
+    - deny all requests by default and only allow requests that match a pattern
+    bypasses:
+    - subdomain matching
+        - eg. https://website.thm.attackers-domain.thm
+        - subdomain begins with a whitelisted prefix (website.thm)
+        - but the hostname is actually attacker controlled
+    - URL credential abuse
+        - eg. https://website.thm@attacker.com/
+        - the allowlist sees website.thm 
+        - but the request goes to attacker.com
+    - Open redirects
+        - eg. https://website.thm/link?url=http://169.254.169.254/latest/meta-data/
+        - the allowlist sees website.thm
+        - but the request gets redirected to 169.254.169.254 (AWS metadata service)
+        - 169.254.169.254 can contain sensitive data in a cloud environment

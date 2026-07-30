@@ -1,0 +1,50 @@
+
+CSRF
+ - Cross-Site Request Forgery
+ - tricks user's browser into sending a request 
+   to a website where the user is authenticated
+
+ - no need to know credentials, 
+   just session cookies 
+   (which are sent automatically by the browser)
+
+ - how an attack goes
+    1) victim logs in to a legitimate website (eg. bank)
+    2) attacker tricks victim into visiting a malicious website (eg. via link, email, ...)
+    3) victim's browser sends a request to the target website with the session cookies
+ - example:
+    - victim is logged in to bank.com
+    - attacker sends a link to malicious.com
+    - malicious.com has a hidden form 
+      that submits a request to bank.com to transfer money
+    - victim's browser automatically includes the session cookies for bank.com,
+      so the request is authenticated
+    - money is transferred without victim's knowledge
+
+Why does it work?
+ - problem is when a web app trusts requests too much
+ - when a user logs in to a website, the server sets some session cookies
+ - these cookies are like an identity card
+ - included in every request to the website
+ - even if the request is sent from a different website (redirect, form submission, etc.)
+ - if the app doesn't verify the request origin, it will process the request as any other.
+
+Three basic conditions for a CSRF attack
+ 1) The victim must be authenticated to the target application
+ 2) The app must perform state-changing action (eg. transfer money, change email, etc.)
+ 3) The app must not verify whether the request came from a trusted source
+
+basically...
+ 1) victim logs in
+ 2) app can do something that the attacker wants 
+ 3) improper origin checks
+
+Finding CSRF vulnerabilities
+ - focus on actions that change data or modify account settings
+ - Can this action be triggered without verifying that the request actually came from the user?
+ - eg. change email, update password, edit profile, 
+       alter payment info, submit forms, ...
+
+ - both GET and POST is vulnerable
+ - CSRF tokens are used for protection
+

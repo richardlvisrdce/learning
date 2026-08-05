@@ -1,0 +1,58 @@
+
+metasploit is an exploit framework
+ - exploits, relevant payloads, and post-exploitation modules
+ - has a pro version with GUI
+
+Penetration testing lifecycle
+ - Information gathering: Scanning targets and fingerprinting services
+ - Vulnerability identification: Detecting known flaws in target systems
+ - Exploitation: Delivering exploit code to take advantage of those flaws
+ - Post-exploitation: Maintaining access, gathering data, and pivoting to other systems
+ - Reporting: Logging findings for documentation and client deliverables
+
+The 7 module categories
+ - exploits: code that takes advantage of a specific vulnerability
+ - auxiliary: supporting modules (eg. scanners, fuzzers, spoofers, brute-force, ...)
+ - payloads: code that runs on the target after a successful exploit
+ - post-exploitation: after gaining access - dumping data, pivoting, enumeration...
+ - encoders: transform payload data into a different format (eg. to bypass antivirus - eg. polymorphic XOR encoding)
+ - evasion: bypassing antivirus (better than encoders)
+ - NOPs: not very important. generate a series of NOP (no operation) instructions to have the payload at predictable memory adress 
+
+Payload types
+ - adapters = convert payloads to a different format
+ - singles = payloads that can run by themselves
+ - stagers = set up a connection metasploit <--> target
+ - stages = for larger payloads
+
+The general structure of a payload path is:
+<platform>/<architecture>/<payload_type><separator><connection_method>
+eg. linux/x86/meterpreter/reverse_tcp
+ = staged meterpreter payload for linux x86
+ - the / confirms staged delivery (single payload would be linux/x86/meterpreter_reverse_tcp)
+
+Workflow for using metasploit
+1) msfconsole
+2) search SERVICE (ideally also version or more details)
+    - advanced search: search type:exploit Apache
+3) use EXPLOIT_NUMBER
+4) info (see if the choice fits)
+5) show options (this will show us all options and tell us which are required)
+    - show payloads (see all compatible payloads, a default payload is already set)
+6) set PARAMETER VALUE (eg. set RPORT 3333)
+    - unset also exists (eg. unset RPORT or unset all)
+    - set is used for module-specific values eg. RPORT, PAYLOAD, SESSION
+    - you have to use setg for values that are/should be global (eg. RHOST, LHOST)
+7) set PAYLOAD PAYLOAD_NAME (eg. set PAYLOAD linux/x86/meterpreter/reverse_tcp)
+7.5) check 
+    - check if the target is vulnerable, only works sometimes
+8) exploit or run
+    - there is exploit -z (to run it in background)
+
+Sessions
+ - if you have a shell or meterpreter session
+ - background: background current session
+ - sessions: list all sessions
+ - sessions -i <ID>: interact with a session
+ - sessions -k <ID>: kill a session (or sessions -K to kill all sessions)
+ - if your shell "weirdly does not work" try upgrading to a meterpreter shell (sessions -u <ID>)

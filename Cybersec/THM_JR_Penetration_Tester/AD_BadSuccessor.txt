@@ -1,0 +1,57 @@
+
+First, a bit about AD (Active Directory)
+ - many types of accounts (user, computer, group)
+ - in the user category we have traditional service accounts and Managed Service Accounts (MSA)
+
+MSA
+ - we don't really care about the first two
+ - sMsa = standalone MSA - for a service running on a single computer
+ - gMSA = group MSA - for a service running on multiple computers/servers
+
+ - dMSA = delegated MSA
+    - most recent addition
+    - enables migration of traditional service accounts to MSA
+    - a dMSA is managed by an administrator, allows running a service on a specific server (not multiple)
+    - introduced in Windows Server 2025
+
+Bad Successor
+ - can be done if the user controls a dMSA object
+ options:
+      1) attacker creates a new dMSA
+      2) attacker gains control of a dMSA
+
+option 1
+ - we got some credentials for a generic user account
+ - we ran a script to identify accounts that can create dMSA in their OUs (one of them was our generic user)
+ - creating a dMSA in an OU where the user has write access
+ - modifying the dMSA object attribute to mimic a successful migration
+ - getting a Ticket Granting Ticket (TGT)
+ - getting credentials
+
+Exploitation using windows, option 1
+ - for a PoC, we first used a script (SharpSuccessor) in C#
+ - we gave the script:
+      - /path to the OU
+      - the account with acess
+      - a name for the new dMSA
+      - the account to impersonate
+ - eg. .\SharpSuccessor.exe add /path:"ou=LabOU,dc=tryhackme,dc=local" /account:tbyte /name:pentest_dmsa /impersonate:Administrator
+ - now we request the TGT (.\Rubeus.exe tgtdeleg /nowrap)
+ - then generate another ticket (it has over 2000 characters lol)
+ - .\Rubeus.exe asktgs /targetuser:pentest_dmsa$ /service:krbtgt/tryhackme.local /opsec /dmsa /nowrap /ptt /ticket:doIFvjC...<very_long_ticket>
+ - With the new ticket, we can request any service ticket with Administrator context
+ - /user:pentest_dmsa$ is who we will impersonate and /service:cifs/DC-LAB2025-01.tryhackme.local is the service we want to access
+ - .\Rubeus.exe asktgs /user:pentest_dmsa$ /service:cifs/DC-LAB2025-01.tryhackme.local /opsec /dmsa /nowrap /ptt /ticket:doIGLjCCB
+ - now we can do bad stuff as Administrator. We grabbed a flag and went home, but possibilities are endless.
+
+exploitation using linux:
+ - use BloodyAD to:
+      - confirm who has write access to the OU
+      - create a dMSA in the OU (this also creates a ccache file with kerberos credentials)
+ - impacket scripts:
+      - getST.py to save the ccache file to an environment variable
+      - secretsdump.py for a  DCSync attack, extracting all domain NTLM hashes
+      - wmiexec.py for a pass-the-hash attack to log in as the Administrator
+ - now we can do bad stuff as Administrator.
+
+As of the room creation, there was no patch from Microsoft.

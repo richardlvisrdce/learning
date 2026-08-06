@@ -1,0 +1,54 @@
+
+wordlist
+ = text file where each line is a potential password/phrase/username/...
+ - fundamental for cracking and enumeration attacks
+ - brute force attacks, dictionary attacks, directory/file enumeration, fuzzing, etc.
+
+Wordlist sources
+ - pre-made
+    - rockyou.txt = over 14 million common passwords (present on kali)
+    - Seclists = broad, multi-functional set of lists for everything (kali classic)
+ - custom
+    - generated based on target recon and context
+    - can be targeted, eg. based on password requirements (eg. n characters, 1 digit and 1 special character)
+ - generated
+    - crunch = generate wordlists based on patterns and rules
+    - eg. every six-character hexadecimal string, outputted to a file
+          crunch 6 6 0123456789abcdef -o 6chars.txt
+    - these worlists are often very large, so this is not always practical
+    - the example one has 16^6 = 16,777,216 entries, which is more than the whole rockyou.txt list
+
+OSINT
+ - a good wordlist is based on the target, so we need some info
+ - LinkedIn - employee names, roles, and job descriptions
+    - https://github.com/initstring/linkedin2username
+    - https://github.com/m8sec/crosslinked
+ - company websites
+ - social media - internal acronyms, usernames/nicknames, services used
+    - also great for social enginnering  
+ - job postings - company tech stack, etc.
+
+Recon
+ - we do all this to create or find a better suited wordlist
+ - WHOIS - domain registration details
+ - subdomain enumeration + certificate search - theHarvester, sublist3r, Recon.ng
+ - site crawling - collect words, meta-tags, documents (CeWL automates this)
+ - technology fingerprinting - tools: BuiltWith, Wappalyzer, whatruns
+
+Harvest their souls and collect words
+ - Cewl: Crawling for Words and Emails
+ - cewl -d 2 -m 3 --lowercase --with-numbers -e --email_file emails.txt -w cewl_words.txt http://tryfinanceme.local
+
+ - recursively downloading pdfs
+ - wget -r -A pdf http://tryfinanceme.local/docs/
+
+ - extracting strings from the pdfs we downloaded
+ - for f in $(find tryfinanceme.local/docs -name '*.pdf'); do strings -n 5 "$f" | grep -vP '^[/<>%0-9\\]|^(stream|endstream|endobj|xref|trailer|startxref)$' >> raw_words.txt; done
+
+ - extracting emails from the pdfs + turning them into usernames
+ - grep -RhiaoP '[A-Za-z0-9._%+-]+@tryfinanceme\.com' tryfinanceme.local/docs > emails_docs.txt
+ - sort -u emails_docs.txt > emails_docs.unique.txt
+ - grep -Po '^[^@]+' emails_docs.unique.txt > users_from_emails.txt
+
+Cleaning
+ - Filter out very short or complex tokens

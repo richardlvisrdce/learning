@@ -1,0 +1,17 @@
+
+injection allows attackers to run unauthorized system commands on a host server.
+
+Detecting blind command injection
+ - curl (eg. appending '; whoami' to the search parameter)
+ - it's best to URL encode the payload (use cyberchef <3)
+ - curl http://vulnerable.app/process.php%3Fsearch%3DThe%20Beatles%3B%20whoami
+ - URL decoded (curl http://vulnerable.app/process.php?search=The Beatles; whoami)
+ - useful payloads: whoami, ls, ping, sleep, nc
+ - windows payloads: whoami, dir, ping, timeout (good when ping is not available)
+
+Reducing risk of command injection
+ - restricting user input
+    - especially in vulnerable functions (eg. exec(), passthru(), system())
+    - eg. your app only needs numbers => only allow numbers 
+ - input sanitisation
+    - removing special characters (mainly >, &, /)

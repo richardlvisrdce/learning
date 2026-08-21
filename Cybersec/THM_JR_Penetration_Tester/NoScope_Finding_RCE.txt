@@ -1,0 +1,26 @@
+
+alf.io
+ - open-source
+ - Java/Spring Boot event management platform
+ - used by organizers, sports clubs, ticketing services,...
+ - has an extension system for custom JS scripts (eg. invoice generation)
+ - uses a sanbox to validate the scripts with a pattern blocklist (eg. java.lang.Runtime is blocked)
+ - assumes that: "a script that can't name a dangerous class can't reach one"
+ - so nothing bad can happen...
+
+What Is NoScope?
+ - AI-powered automated pentesting platform
+
+CVE-2026-35482
+ - discovered by NoScope in a full automated pentest
+ - https://www.noscope.com/blog/cve-2026-35482-noscope-alf-rce
+
+ - *-* this is very shortened and simplified, because I don't understand it fully *-*
+ - *-* for us, just the idea is important, not specifics *-*
+
+ - alf.io injects a variable called returnClass - a raw Java Class<T> object
+ - this object exposes Class.forName()
+ - through that an attacker can load any JVM class (just pass it as a string)
+ - the blocklist is bypassed
+ - now the attacker has full access to Runtime.exec() and arbitrary code execution
+

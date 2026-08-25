@@ -28,7 +28,7 @@ Kerberos
  - newer & more secure than NTLM
  - uses tickets for authentication
 
-# NTLM
+# NTLM
 
 ### NTLM benefits:
  - simple
@@ -112,7 +112,7 @@ Note: when using Kerberos, we use hostnames, because it relies on SPNs which are
 
 
 
-# Practical task notes
+# Practical task notes
 
 Impacket supports Pass-the-Hash authentication directly with -hashes
 
@@ -157,7 +157,7 @@ auth as the Domain Administrator using the forged TGT
 
 remember to use hostnames
 
-# Detection & mitigation
+# Detection & mitigation
 
 windows logs a security event for each authentication attempt
 

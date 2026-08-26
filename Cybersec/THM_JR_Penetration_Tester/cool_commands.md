@@ -9,7 +9,7 @@ eg. `ffuf -w valid_usernames.txt:W1,/usr/share/wordlists/SecLists/Passwords/Comm
 
 `shift + command + F` searches for selected text in all files
 
-### generic recursive search for a file, no error flood
+### generic recursive search for a file, no error flood
 
 `find / -name flag.txt 2>/dev/null`
 
@@ -17,3 +17,9 @@ eg. `ffuf -w valid_usernames.txt:W1,/usr/share/wordlists/SecLists/Passwords/Comm
 ### history cut to get only the commands
 
 `history | cut -d " " -f 5`
+
+### find SUID binaries unprivileged
+
+`find / -user root -perm /4000 2>/dev/null`
+
+usually suffices to find SUID binaries (does not use sudo - eg. sudo -l )

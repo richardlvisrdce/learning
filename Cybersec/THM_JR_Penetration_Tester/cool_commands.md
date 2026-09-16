@@ -86,4 +86,29 @@ print(result)
 3) `stty raw -echo; fg`
 
 ### web hacked - revshell but where next?
-try `/var/www/html` to find some config files 
+try `/var/www/html` to find some config files
+
+### rev.py
+
+just copy the revshells.com python#2 shell and format it normally
+(I can't put it here as it would get flagged as malware)
+
+### AD cheatsheet (not mine)
+
+[AD cheatsheet](https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap_ad_dark_classic_2025.03.excalidraw.svg)
+
+### RDP
+
+`xfreerdp /u:Administrator /p:password /v:111.222.333.444 /dynamic-resolution`
+
+### powershell - how to survive powershell
+
+`gal` or `Get-Alias` to see all aliases (commands that are understandable for UNIX users)
+scroll through the list and pray to all gods you know, that you find what you need
+
+else, feel its wrath and a cold presence will form behind your back. Do not look behind you. If you do, your eyes will have the windows logo burned into your retinas and you will have to say "I invoke command ..." for every task of your day. If you fail to do so, you will leave this reality for a place far more desolate than anything you've experienced. No one knows what happens to those who do, but it sure is not pleasant.
+
+anyways . . .
+
+
+

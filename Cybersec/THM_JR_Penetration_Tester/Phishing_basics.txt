@@ -1,0 +1,120 @@
+beep boop human is vulnerable
+don't pay for a secure door, if you let the burglar in
+
+Phishing
+ = social engineering to trick people 
+   into revealing sensitive information 
+   or running malware on their devices
+
+ - phishing - cast a wide net, hoping to catch a few victims
+ - spear phishing - targeted attack on a specific individual
+ - whaling - targeted attack on a high-profile individual (CEO, CFO)
+
+Social engineering 101
+ - scarcity  - push the victim to act before they think (FOMO)
+ - urgency   - time pressure (eg. within 24 hours, immediately)
+ - authority - impersonate a figure of authority for quick compliance
+ - fear      - trigger a protective reaction, urgent action (eg. "your account has been compromised")
+ - curiosity - promising interesting content (eg. random USB drive, "confidential report", "secret video")
+ - trust     - familiar sender/brand/website or colleague (make it seem routine)
+
+Cognitive biases
+ - overconfidence bias - "I know better than to fall for phishing" (spoiler: you don't)
+ - confirmation bias - "this is what I expected to see" (eg. a fake bank email confirming a recent transaction)
+ - authority bias - "this is from my boss, I should do it"
+
+________________________________
+Phishing techniques
+
+URL & domain manipulation 
+ - URL masking
+    - normal site redirects to a malicious one
+    - eg. http://www.google.com -> http://malicious.com
+
+ - Homograph attacks
+    - fake website looks like a real one
+    - eg. go0gle.com, Linked1n.com
+
+ - Typosquatting
+    - register a domain similar to a popular one, hoping for typos
+    - eg. amazn.com, facebok.com, tryhacme.com
+
+Email spoofing
+
+ - changing the "From" field in an email to make it look like it's from a trusted source
+ - SMTP does not have built-in authentication of email addresses
+ - this is mostly mitigated by good mail clients (there will be a big warning text next to the name)
+
+ - using a similar domain to a trusted one
+ - eg. support@acme-secure.com instead of support@acme.com
+
+Login cloning
+ - create a fake login page that looks like the real one
+ - you wouldn't believe how many people enter their credentials
+ - there is software for this
+
+________________________________
+Tools
+
+Go-Phish
+ - web based phishing framework
+ - allows you to create and manage phishing campaigns
+ - can clone websites, send emails, and track victims
+
+EvilNginx
+ - advanced phishing campaigns
+ - can bypass MFA
+ - acts as a reverse proxy, intercepting traffic between the victim and the legitimate site
+
+The social engineering toolkit (SET)
+ - self explanatory
+ - spearphishing, fake common websites
+
+________________________________
+Phishing campaign
+
+1) Planning & Scoping
+ - who to target and what to measure
+
+2) Reconnaissance
+ - use public info, keep within scope
+
+3) Scenario and Pyload development
+ - Payloads should support learning, not exploitation (avoid malware)
+
+4) Exploitation and Post-Exploitation
+ - run it
+
+5) Reporting and Debriefing
+ - Analyse what happened and why (click rates, timing, submission attempts, behaviour)
+
+6) Recommendations table
+ - open rate, click rate, credential entry rate, attachment open rate, reporting rate
+ - what worked, what didn't, what to improve
+ - eg. the 6% credential entry rate is a high risk, so we recommend... (eg. education)
+
+________________________________
+using SET (Social Engineering Toolkit)
+
+download it (or use kali)
+run it in terminal (we have an alias for it - SET)
+set > 1) Social-Engineering Attacks
+set > 2) Website Attack Vectors
+set > 3) Credential Harvester Attack Method
+set > 3) Custom Import
+<path_to_index.html> (eg. /home/website/)
+
+now your choice:
+1. Copy just the index.html
+2. Copy the entire folder
+we go with 1
+enter the url to clone (eg. http://tryacounting.thm)
+
+now the cloned page is running on the POST back adress (<TARGET> for us) on port 80
+
+send that email to the victim (eg. your boss) (sarcasm, dont sue me pls)
+we will be also spoofing the "From" field (we use Rainloop Webmail)
+subject: not phishing
+body: ...please log in to our internal portal and update your password before Friday. Thank you, support team.
+
+bro actually clicked on it lols"""!!!! lets 10x our paycheck 

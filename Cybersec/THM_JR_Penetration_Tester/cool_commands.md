@@ -206,8 +206,6 @@ I use uv tool to manage packages
 
 basic commands in my writeup: `Cybersec/THM_JR_Penetration_Tester/AD-Basic+Authenticated_Enumeration.md`
 
-[AD enum writeup link]('https://frajer.gitbook.io/tryhackme/cybersec/thm_jr_penetration_tester/ad-basic+authenticated_enumeration')
-
 ### leaked pgp key
 
 in this case we found ***tryhackme.asc***, which is a pgp key and we have ***credential.pgp*** that's been encrypted with it.

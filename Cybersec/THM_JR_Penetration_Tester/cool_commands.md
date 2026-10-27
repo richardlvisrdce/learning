@@ -117,7 +117,7 @@ anyways . . .
 
 ### kali stuff
 
-`cd /` to go to root directory and `cd ~` to go to home directory
+`cd /` to go to root directory and `cd ~` to go to home directory, also `..` works instead of `cd ..`
 
 `cd /usr/share && ls` here are most of your tools (+ wordlists)
  - eg. `/usr/share/wordlists/`, `/usr/share/webshells/`
@@ -206,6 +206,8 @@ I use uv tool to manage packages
 
 basic commands in my writeup: `Cybersec/THM_JR_Penetration_Tester/AD-Basic+Authenticated_Enumeration.md`
 
+`systeminfo`, `set` (variables), `tasklist` (ps), `wmic service get Name,StartName`, `whoami /all` (groups + perms), `icacls <PATH>` (dir/file permissions)
+
 ### leaked pgp key
 
 in this case we found ***tryhackme.asc***, which is a pgp key and we have ***credential.pgp*** that's been encrypted with it.
@@ -217,3 +219,9 @@ in this case we found ***tryhackme.asc***, which is a pgp key and we have ***cre
 `gpg --import tryhackme.asc` - import the key
 
 `gpg --decrypt credential.pgp` - decrypt by entering the password
+
+### weird tools
+
+`NetworkMiner` - analyze pcap + extract files, credentials, certs
+
+

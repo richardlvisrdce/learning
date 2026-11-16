@@ -6,9 +6,20 @@ FILENAME = "Blue"
 TARGET_FILE = f"Cybersec/THM_Cybersecurity101/THM_{FILENAME}.txt"
 
 # Blue má spoustu # takže je to fucked
+""" Co chybí?
+ - co když už je to z půlky markdown?
+ - pokud to je txt tak předpoklad že nepoužili md syntax - jinak problem
+ - regex je nedostatečný - hlavně keywords
+half-markdown problem solution:
+ --- pokud vím přesně jak vypadají MD elementy, pak je to simple ---
+ - code blocks jako ```text``` tak to kompletně skipnout (umím to v O(n), jde to lépe? nějaké smart skipy?)
+ - pokud už něco je mezi jednou a více "*" tak skip až za poslední "*"
+ - 
+ - image linky??
+"""
 
 def format_inline_commands(text: str) -> str:
-    # 1. Celé URL odkazy
+    # 1. Celé URL odkazy - zachytit i http://site.com nebo www.site.com
     text = re.sub(r'(https?://[^\s`]+)', r'`\1`', text)
     
     # 2. IP adresy (včetně portů)
@@ -24,6 +35,9 @@ def format_inline_commands(text: str) -> str:
 
 
 def prettify_text_to_markdown(content: str, filename: str) -> str:
+    """
+    not good z hlediska half-markdown problem
+    """
     lines = content.splitlines()
     if not lines:
         return ""
@@ -51,7 +65,7 @@ def prettify_text_to_markdown(content: str, filename: str) -> str:
             continue
 
         # 2. Detekce příkazové řádky / promptu
-        # 100% bezpečný regex:
+        # 100% bezpečný regex (lol):
         is_cmd_line = bool(re.match(r'^(root@|kali@|user@|\$|>|PS\s+|(?:\b(nc|nmap|gobuster|ffuf|sqlmap|hydra|hashcat|john|cat|ls|cd|grep|curl|wget|mysql|sudo|su|echo|python|python3)\b))', clean_line))
 
         if is_cmd_line:
